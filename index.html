@@ -13,7 +13,6 @@
 
 <div id="app">
 
-  <!-- EN-TÊTE -->
   <header class="topbar">
 
     <div class="logo">
@@ -22,7 +21,7 @@
 
     <div class="top-actions">
 
-      <button class="icon-btn notification-btn">
+      <button class="icon-btn">
         <svg viewBox="0 0 24 24">
           <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/>
         </svg>
@@ -40,162 +39,91 @@
   </header>
 
 
-  <!-- ONGLETS -->
   <div class="tabs">
     <button class="tab active">Pour toi</button>
     <button class="tab">Abonnements</button>
   </div>
 
 
-  <!-- PUBLICATION -->
-  <main class="feed">
+  <!-- LES PUBLICATIONS SERONT AJOUTÉES ICI -->
+  <main class="feed" id="feed">
 
-    <article class="post">
+    <div class="empty-feed" id="emptyFeed">
 
-      <div class="post-header">
-
-        <div class="avatar">P</div>
-
-        <div class="post-user">
-          <strong>prettygirls</strong>
-        </div>
-
-        <button class="more-btn">•••</button>
-
+      <div class="empty-logo">
+        <span>Pretty</span><strong>Girls</strong>
       </div>
 
+      <p>Aucune publication pour le moment</p>
 
-      <!-- MÉDIAS DE LA PUBLICATION -->
-      <div class="media-container" id="openViewer">
+      <small>
+        Appuie sur + pour créer ta première publication
+      </small>
 
-        <div class="photo-placeholder" id="feedPlaceholder">
-          <span>PrettyGirls</span>
-
-          <small>
-            Appuie sur + pour choisir tes photos
-          </small>
-        </div>
-
-        <!-- CARROUSEL -->
-        <div class="carousel" id="carousel">
-
-          <div class="carousel-track" id="carouselTrack"></div>
-
-          <button
-            class="carousel-arrow carousel-prev"
-            id="carouselPrev"
-            type="button"
-          >
-            ‹
-          </button>
-
-          <button
-            class="carousel-arrow carousel-next"
-            id="carouselNext"
-            type="button"
-          >
-            ›
-          </button>
-
-          <div class="carousel-counter" id="carouselCounter"></div>
-
-          <div class="carousel-dots" id="carouselDots"></div>
-
-        </div>
-
-
-        <!-- GRILLE -->
-        <div class="media-grid" id="mediaGrid"></div>
-
-      </div>
-
-
-      <!-- ACTIONS -->
-      <div class="post-actions">
-
-        <div class="left-actions">
-
-          <button class="action-btn like-btn" id="feedLike">
-            <svg viewBox="0 0 24 24">
-              <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/>
-            </svg>
-          </button>
-
-          <button class="action-btn">
-            <svg viewBox="0 0 24 24">
-              <path d="M21 11.5a8.4 8.4 0 0 1-9 8.5 9.5 9.5 0 0 1-4-.9L3 21l1.7-4.6A8.5 8.5 0 1 1 21 11.5z"/>
-            </svg>
-          </button>
-
-          <button class="action-btn">
-            <svg viewBox="0 0 24 24">
-              <path d="M22 2L9.5 14.5M22 2l-8 20-4.5-7.5L2 10l20-8z"/>
-            </svg>
-          </button>
-
-        </div>
-
-        <button class="action-btn bookmark-btn">
-          <svg viewBox="0 0 24 24">
-            <path d="M6 3h12v18l-6-4-6 4V3z"/>
-          </svg>
-        </button>
-
-      </div>
-
-      <div class="likes">
-        <strong id="likeCount">0 J’aime</strong>
-      </div>
-
-      <div class="caption">
-        <strong>prettygirls</strong>
-        Bienvenue sur PrettyGirls ❤️
-      </div>
-
-    </article>
+    </div>
 
   </main>
 
 
-  <!-- NAVIGATION BAS -->
+  <!-- BARRE DU BAS -->
   <nav class="bottom-nav">
 
     <button class="nav-btn active">
+
       <svg viewBox="0 0 24 24">
         <path d="M3 10.5L12 3l9 7.5V21h-6v-6H9v6H3V10.5z"/>
       </svg>
+
       <span>Accueil</span>
+
     </button>
 
+
     <button class="nav-btn">
+
       <svg viewBox="0 0 24 24">
         <circle cx="11" cy="11" r="7"/>
         <path d="M20 20l-4-4"/>
       </svg>
+
       <span>Explorer</span>
+
     </button>
 
-    <button class="create-btn" id="createPost">
+
+    <button
+      class="create-btn"
+      id="createPost"
+      type="button"
+    >
       +
     </button>
 
+
     <button class="nav-btn">
+
       <svg viewBox="0 0 24 24">
         <rect x="3" y="4" width="18" height="16" rx="3"/>
         <path d="M8 4l4 5 4-5M10 12l6 3-6 3z"/>
       </svg>
+
       <span>Reels</span>
+
     </button>
 
+
     <button class="nav-btn">
+
       <div class="mini-avatar">P</div>
+
       <span>Profil</span>
+
     </button>
 
   </nav>
 
 
-  <!-- SÉLECTION DE PLUSIEURS PHOTOS -->
+  <!-- SÉLECTION PHOTOS -->
   <input
     type="file"
     id="imagePicker"
@@ -205,7 +133,7 @@
   >
 
 
-  <!-- CHOIX DU TYPE DE PUBLICATION -->
+  <!-- CHOIX CARROUSEL / GRILLE -->
   <div class="publish-choice" id="publishChoice">
 
     <div class="publish-choice-box">
@@ -216,23 +144,36 @@
         Photos sélectionnées
       </p>
 
+
       <button
         class="publish-type-btn"
         id="chooseCarousel"
         type="button"
       >
+
         <strong>Carrousel</strong>
-        <span>Faire défiler les photos une par une</span>
+
+        <span>
+          Faire défiler les photos une par une
+        </span>
+
       </button>
+
 
       <button
         class="publish-type-btn"
         id="chooseGrid"
         type="button"
       >
+
         <strong>Grille</strong>
-        <span>Afficher plusieurs photos ensemble</span>
+
+        <span>
+          Afficher plusieurs photos ensemble
+        </span>
+
       </button>
+
 
       <button
         class="cancel-publish"
@@ -252,19 +193,23 @@
 
     <div class="viewer-header">
 
-      <button id="closeViewer" type="button">‹</button>
+      <button
+        id="closeViewer"
+        type="button"
+      >
+        ‹
+      </button>
 
       <strong>Publication</strong>
 
     </div>
 
 
-    <!-- CARROUSEL PLEIN ÉCRAN -->
-    <div class="viewer-media" id="viewerMedia">
+    <div class="viewer-media">
 
       <div
-        class="viewer-carousel-track"
-        id="viewerCarouselTrack"
+        class="viewer-track"
+        id="viewerTrack"
       ></div>
 
       <button
@@ -291,39 +236,52 @@
     </div>
 
 
-    <!-- ACTIONS VIEWER -->
     <div class="viewer-actions">
 
-      <button class="viewer-action like-btn" id="viewerLike">
+      <button
+        class="viewer-action like-btn"
+        id="viewerLike"
+        type="button"
+      >
+
         <svg viewBox="0 0 24 24">
           <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/>
         </svg>
 
         <span id="viewerLikeCount">0</span>
+
       </button>
 
+
       <button class="viewer-action">
+
         <svg viewBox="0 0 24 24">
           <path d="M21 11.5a8.4 8.4 0 0 1-9 8.5 9.5 9.5 0 0 1-4-.9L3 21l1.7-4.6A8.5 8.5 0 1 1 21 11.5z"/>
         </svg>
+
       </button>
 
+
       <button class="viewer-action">
+
         <svg viewBox="0 0 24 24">
           <path d="M22 2L9.5 14.5M22 2l-8 20-4.5-7.5L2 10l20-8z"/>
         </svg>
+
       </button>
 
+
       <button class="viewer-action">
+
         <svg viewBox="0 0 24 24">
           <path d="M6 3h12v18l-6-4-6 4V3z"/>
         </svg>
+
       </button>
 
     </div>
 
 
-    <!-- INFORMATIONS VIEWER -->
     <div class="viewer-info">
 
       <div class="viewer-user">
