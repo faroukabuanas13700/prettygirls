@@ -18,6 +18,7 @@ body {
 
 button {
   font-family: inherit;
+  cursor: pointer;
 }
 
 #app {
@@ -28,6 +29,7 @@ button {
   background: #000;
   padding-bottom: 75px;
 }
+
 
 /* =========================
    EN-TÊTE
@@ -51,11 +53,13 @@ button {
   letter-spacing: -1.5px;
 }
 
-.logo span {
+.logo span,
+.empty-logo span {
   color: #fff;
 }
 
-.logo strong {
+.logo strong,
+.empty-logo strong {
   color: #ff3040;
 }
 
@@ -72,7 +76,6 @@ button {
   background: transparent;
   color: #fff;
   padding: 0;
-  cursor: pointer;
 }
 
 .icon-btn {
@@ -110,6 +113,7 @@ button {
   font-weight: bold;
 }
 
+
 /* =========================
    ONGLETS
 ========================= */
@@ -145,13 +149,50 @@ button {
   background: #fff;
 }
 
+
 /* =========================
-   PUBLICATION
+   FEED VIDE
 ========================= */
 
 .feed {
   width: 100%;
 }
+
+.empty-feed {
+  min-height: 65vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 30px;
+}
+
+.empty-feed.hidden {
+  display: none;
+}
+
+.empty-logo {
+  font-size: 34px;
+  font-weight: 900;
+  letter-spacing: -1.5px;
+}
+
+.empty-feed p {
+  margin: 20px 0 7px;
+  font-size: 17px;
+  font-weight: bold;
+}
+
+.empty-feed small {
+  color: #888;
+  line-height: 19px;
+}
+
+
+/* =========================
+   PUBLICATION
+========================= */
 
 .post {
   width: 100%;
@@ -197,70 +238,32 @@ button {
   letter-spacing: 2px;
 }
 
+
 /* =========================
-   ZONE MÉDIA
+   MÉDIAS
 ========================= */
 
-.media-container {
+.post-media {
   width: 100%;
   aspect-ratio: 4 / 5;
-  background: #111;
   position: relative;
   overflow: hidden;
+  background: #111;
 }
 
-.photo-placeholder {
-  width: 100%;
-  height: 100%;
-  background:
-    radial-gradient(
-      circle at 30% 25%,
-      #3b1220 0%,
-      transparent 35%
-    ),
-    radial-gradient(
-      circle at 75% 70%,
-      #22082f 0%,
-      transparent 40%
-    ),
-    #0d0d0d;
-
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-}
-
-.photo-placeholder span {
-  font-size: 34px;
-  font-weight: 900;
-}
-
-.photo-placeholder small {
-  margin-top: 12px;
-  color: #999;
-  font-size: 13px;
-}
 
 /* =========================
    CARROUSEL
 ========================= */
 
-.carousel {
+.post-carousel {
   width: 100%;
   height: 100%;
   position: relative;
   overflow: hidden;
-  display: none;
-  background: #000;
 }
 
-.carousel.active {
-  display: block;
-}
-
-.carousel-track {
+.post-carousel-track {
   width: 100%;
   height: 100%;
   display: flex;
@@ -270,19 +273,18 @@ button {
   scrollbar-width: none;
 }
 
-.carousel-track::-webkit-scrollbar {
+.post-carousel-track::-webkit-scrollbar {
   display: none;
 }
 
-.carousel-slide {
-  width: 100%;
+.post-slide {
   min-width: 100%;
+  width: 100%;
   height: 100%;
   scroll-snap-align: start;
-  position: relative;
 }
 
-.carousel-slide img {
+.post-slide img {
   width: 100%;
   height: 100%;
   display: block;
@@ -299,8 +301,7 @@ button {
   border-radius: 50%;
   background: rgba(0, 0, 0, 0.55);
   color: #fff;
-  font-size: 29px;
-  line-height: 30px;
+  font-size: 28px;
   z-index: 5;
 }
 
@@ -316,10 +317,9 @@ button {
   position: absolute;
   top: 12px;
   right: 12px;
-  background: rgba(0, 0, 0, 0.65);
-  color: #fff;
-  border-radius: 20px;
   padding: 5px 9px;
+  border-radius: 20px;
+  background: rgba(0, 0, 0, 0.65);
   font-size: 12px;
   font-weight: bold;
   z-index: 5;
@@ -331,7 +331,6 @@ button {
   left: 50%;
   transform: translateX(-50%);
   display: flex;
-  align-items: center;
   gap: 5px;
   z-index: 5;
 }
@@ -348,43 +347,43 @@ button {
   transform: scale(1.25);
 }
 
+
 /* =========================
-   GRILLE DE PHOTOS
+   GRILLE
 ========================= */
 
-.media-grid {
+.post-grid {
   width: 100%;
   height: 100%;
-  display: none;
+  display: grid;
   gap: 2px;
   background: #000;
 }
 
-.media-grid.active {
-  display: grid;
-}
-
-.media-grid.grid-1 {
+.post-grid.grid-1 {
   grid-template-columns: 1fr;
 }
 
-.media-grid.grid-2 {
+.post-grid.grid-2 {
   grid-template-columns: repeat(2, 1fr);
 }
 
-.media-grid.grid-3,
-.media-grid.grid-4,
-.media-grid.grid-many {
+.post-grid.grid-3,
+.post-grid.grid-4,
+.post-grid.grid-many {
   grid-template-columns: repeat(2, 1fr);
   grid-template-rows: repeat(2, 1fr);
 }
 
+.post-grid.grid-3 .grid-item:first-child {
+  grid-row: span 2;
+}
+
 .grid-item {
-  width: 100%;
-  height: 100%;
+  min-width: 0;
   min-height: 0;
-  overflow: hidden;
   position: relative;
+  overflow: hidden;
   background: #111;
 }
 
@@ -393,10 +392,6 @@ button {
   height: 100%;
   display: block;
   object-fit: cover;
-}
-
-.media-grid.grid-3 .grid-item:first-child {
-  grid-row: span 2;
 }
 
 .grid-more {
@@ -410,8 +405,9 @@ button {
   font-weight: bold;
 }
 
+
 /* =========================
-   ACTIONS PUBLICATION
+   ACTIONS
 ========================= */
 
 .post-actions {
@@ -456,6 +452,7 @@ button {
 .caption strong {
   margin-right: 5px;
 }
+
 
 /* =========================
    NAVIGATION BAS
@@ -515,12 +512,12 @@ button {
   color: #fff;
   font-size: 30px;
   line-height: 30px;
-  font-weight: 300;
   box-shadow: 0 0 18px rgba(255, 48, 64, 0.25);
 }
 
+
 /* =========================
-   CHOIX CARROUSEL / GRILLE
+   CHOIX PUBLICATION
 ========================= */
 
 .publish-choice {
@@ -574,11 +571,6 @@ button {
   justify-content: center;
 }
 
-.publish-type-btn:active {
-  background: #292929;
-  transform: scale(0.99);
-}
-
 .publish-type-btn strong {
   font-size: 16px;
   margin-bottom: 5px;
@@ -597,17 +589,17 @@ button {
   color: #ff3040;
   font-size: 15px;
   font-weight: bold;
-  margin-top: 3px;
 }
 
+
 /* =========================
-   VIEWER PLEIN ÉCRAN
+   VIEWER
 ========================= */
 
 .viewer {
   position: fixed;
   inset: 0;
-  z-index: 100;
+  z-index: 300;
   background: #000;
   display: none;
   max-width: 500px;
@@ -643,7 +635,6 @@ button {
   background: transparent;
   color: #fff;
   font-size: 42px;
-  line-height: 30px;
   padding: 0;
   margin-right: 5px;
 }
@@ -657,10 +648,9 @@ button {
   height: 100%;
   position: relative;
   overflow: hidden;
-  background: #000;
 }
 
-.viewer-carousel-track {
+.viewer-track {
   width: 100%;
   height: 100%;
   display: flex;
@@ -670,7 +660,7 @@ button {
   scrollbar-width: none;
 }
 
-.viewer-carousel-track::-webkit-scrollbar {
+.viewer-track::-webkit-scrollbar {
   display: none;
 }
 
@@ -682,13 +672,11 @@ button {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #000;
 }
 
 .viewer-slide img {
   width: 100%;
   height: 100%;
-  display: block;
   object-fit: contain;
 }
 
@@ -721,15 +709,10 @@ button {
   background: rgba(0, 0, 0, 0.65);
   border-radius: 20px;
   padding: 5px 9px;
-  color: #fff;
   font-size: 12px;
   font-weight: bold;
   z-index: 6;
 }
-
-/* =========================
-   ACTIONS VIEWER
-========================= */
 
 .viewer-actions {
   position: absolute;
@@ -737,7 +720,6 @@ button {
   bottom: 105px;
   display: flex;
   flex-direction: column;
-  align-items: center;
   gap: 21px;
   z-index: 8;
 }
@@ -750,7 +732,6 @@ button {
   align-items: center;
   gap: 4px;
   font-size: 11px;
-  text-shadow: 0 1px 4px #000;
 }
 
 .viewer-info {
@@ -778,8 +759,8 @@ button {
 
 .viewer-caption {
   font-size: 14px;
-  line-height: 19px;
 }
+
 
 /* =========================
    MOBILE
@@ -787,19 +768,10 @@ button {
 
 @media (max-width: 500px) {
 
-  #app {
-    max-width: none;
-  }
-
+  #app,
+  .viewer,
+  .publish-choice-box,
   .bottom-nav {
-    max-width: none;
-  }
-
-  .viewer {
-    max-width: none;
-  }
-
-  .publish-choice-box {
     max-width: none;
   }
 
