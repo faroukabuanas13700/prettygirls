@@ -1,55 +1,70 @@
 document.addEventListener("DOMContentLoaded", () => {
 
+  const feed = document.getElementById("feed");
+  const emptyFeed = document.getElementById("emptyFeed");
+
   const createPost = document.getElementById("createPost");
   const imagePicker = document.getElementById("imagePicker");
 
-  const feedPlaceholder = document.getElementById("feedPlaceholder");
-  const openViewer = document.getElementById("openViewer");
-
-  const carousel = document.getElementById("carousel");
-  const carouselTrack = document.getElementById("carouselTrack");
-  const carouselPrev = document.getElementById("carouselPrev");
-  const carouselNext = document.getElementById("carouselNext");
-  const carouselCounter = document.getElementById("carouselCounter");
-  const carouselDots = document.getElementById("carouselDots");
-
-  const mediaGrid = document.getElementById("mediaGrid");
-
   const publishChoice = document.getElementById("publishChoice");
   const selectedCount = document.getElementById("selectedCount");
+
   const chooseCarousel = document.getElementById("chooseCarousel");
   const chooseGrid = document.getElementById("chooseGrid");
   const cancelPublish = document.getElementById("cancelPublish");
 
   const viewer = document.getElementById("viewer");
-  const closeViewer = document.getElementById("closeViewer");
-
-  const viewerCarouselTrack =
-    document.getElementById("viewerCarouselTrack");
+  const viewerTrack = document.getElementById("viewerTrack");
+  const viewerCounter = document.getElementById("viewerCounter");
 
   const viewerPrev = document.getElementById("viewerPrev");
   const viewerNext = document.getElementById("viewerNext");
-  const viewerCounter = document.getElementById("viewerCounter");
 
-  const feedLike = document.getElementById("feedLike");
+  const closeViewer = document.getElementById("closeViewer");
+
   const viewerLike = document.getElementById("viewerLike");
-  const likeCount = document.getElementById("likeCount");
-  const viewerLikeCount =
-    document.getElementById("viewerLikeCount");
+  const viewerLikeCount = document.getElementById("viewerLikeCount");
 
-  let selectedImages = [];
   let pendingImages = [];
 
-  let currentIndex = 0;
+  let posts = [];
+
+  let activePost = null;
   let viewerIndex = 0;
 
-  let publicationType = "carousel";
-  let liked = false;
+
+  /* =========================
+     ICÔNES
+  ========================= */
+
+  const heartIcon = `
+    <svg viewBox="0 0 24 24">
+      <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/>
+    </svg>
+  `;
+
+  const commentIcon = `
+    <svg viewBox="0 0 24 24">
+      <path d="M21 11.5a8.4 8.4 0 0 1-9 8.5 9.5 9.5 0 0 1-4-.9L3 21l1.7-4.6A8.5 8.5 0 1 1 21 11.5z"/>
+    </svg>
+  `;
+
+  const shareIcon = `
+    <svg viewBox="0 0 24 24">
+      <path d="M22 2L9.5 14.5M22 2l-8 20-4.5-7.5L2 10l20-8z"/>
+    </svg>
+  `;
+
+  const bookmarkIcon = `
+    <svg viewBox="0 0 24 24">
+      <path d="M6 3h12v18l-6-4-6 4V3z"/>
+    </svg>
+  `;
 
 
-  /* ========================================
+  /* =========================
      BOUTON +
-  ======================================== */
+  ========================= */
 
   createPost.addEventListener("click", () => {
 
@@ -60,11 +75,11 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
 
-  /* ========================================
-     SÉLECTION DE PLUSIEURS PHOTOS
-  ======================================== */
+  /* =========================
+     CHOIX DES PHOTOS
+  ========================= */
 
-  imagePicker.addEventListener("change", (event) => {
+  imagePicker.addEventListener("change", event => {
 
     const files = Array.from(event.target.files);
 
@@ -73,7 +88,7 @@ document.addEventListener("DOMContentLoaded", () => {
     clearPendingImages();
 
     pendingImages = files.map(file => ({
-      file: file,
+      file,
       url: URL.createObjectURL(file)
     }));
 
@@ -89,9 +104,9 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
 
-  /* ========================================
+  /* =========================
      ANNULER
-  ======================================== */
+  ========================= */
 
   cancelPublish.addEventListener("click", () => {
 
@@ -104,317 +119,561 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
 
-  /* ========================================
-     CHOISIR CARROUSEL
-  ======================================== */
+  /* =========================
+     CRÉER CARROUSEL
+  ========================= */
 
   chooseCarousel.addEventListener("click", () => {
 
-    publicationType = "carousel";
-
-    confirmPublication();
+    createNewPost("carousel");
 
   });
 
 
-  /* ========================================
-     CHOISIR GRILLE
-  ======================================== */
+  /* =========================
+     CRÉER GRILLE
+  ========================= */
 
   chooseGrid.addEventListener("click", () => {
 
-    publicationType = "grid";
-
-    confirmPublication();
+    createNewPost("grid");
 
   });
 
 
-  /* ========================================
-     CONFIRMER PUBLICATION
-  ======================================== */
+  /* =========================
+     NOUVELLE PUBLICATION
+  ========================= */
 
-  function confirmPublication() {
+  function createNewPost(type) {
 
-    clearSelectedImages();
+    if (!pendingImages.length) return;
 
-    selectedImages = pendingImages;
+    const post = {
+
+      id: Date.now(),
+
+      type,
+
+      images: pendingImages,
+
+      liked: false,
+
+      likes: 0,
+
+      currentIndex: 0
+
+    };
+
     pendingImages = [];
 
-    currentIndex = 0;
-    viewerIndex = 0;
+    posts.unshift(post);
 
     publishChoice.classList.remove("open");
 
     document.body.style.overflow = "";
 
-    feedPlaceholder.style.display = "none";
-
-    renderPublication();
-
-    renderViewer();
+    renderFeed();
 
   }
 
 
-  /* ========================================
-     AFFICHER PUBLICATION
-  ======================================== */
+  /* =========================
+     AFFICHER LE FEED
+  ========================= */
 
-  function renderPublication() {
+  function renderFeed() {
 
-    carousel.classList.remove("active");
-    mediaGrid.className = "media-grid";
+    feed.innerHTML = "";
 
-    carouselTrack.innerHTML = "";
-    carouselDots.innerHTML = "";
-    mediaGrid.innerHTML = "";
+    if (!posts.length) {
 
-    if (!selectedImages.length) return;
+      feed.appendChild(emptyFeed);
 
-    if (publicationType === "carousel") {
+      emptyFeed.classList.remove("hidden");
 
-      renderCarousel();
-
-    } else {
-
-      renderGrid();
+      return;
 
     }
 
+    posts.forEach(post => {
+
+      const article = createPostElement(post);
+
+      feed.appendChild(article);
+
+    });
+
   }
 
 
-  /* ========================================
+  /* =========================
+     CRÉER UNE PUBLICATION
+  ========================= */
+
+  function createPostElement(post) {
+
+    const article = document.createElement("article");
+
+    article.className = "post";
+
+    article.dataset.postId = post.id;
+
+
+    /* EN-TÊTE */
+
+    const header = document.createElement("div");
+
+    header.className = "post-header";
+
+    header.innerHTML = `
+      <div class="avatar">P</div>
+
+      <div class="post-user">
+        <strong>prettygirls</strong>
+      </div>
+
+      <button class="more-btn" type="button">
+        •••
+      </button>
+    `;
+
+    article.appendChild(header);
+
+
+    /* MÉDIA */
+
+    const media = document.createElement("div");
+
+    media.className = "post-media";
+
+    if (post.type === "carousel") {
+
+      createCarousel(post, media);
+
+    } else {
+
+      createGrid(post, media);
+
+    }
+
+    article.appendChild(media);
+
+
+    /* ACTIONS */
+
+    const actions = document.createElement("div");
+
+    actions.className = "post-actions";
+
+    actions.innerHTML = `
+      <div class="left-actions">
+
+        <button
+          class="action-btn like-btn ${post.liked ? "liked" : ""}"
+          type="button"
+        >
+          ${heartIcon}
+        </button>
+
+        <button class="action-btn" type="button">
+          ${commentIcon}
+        </button>
+
+        <button class="action-btn" type="button">
+          ${shareIcon}
+        </button>
+
+      </div>
+
+      <button class="action-btn" type="button">
+        ${bookmarkIcon}
+      </button>
+    `;
+
+
+    const likeButton =
+      actions.querySelector(".like-btn");
+
+    likeButton.addEventListener("click", () => {
+
+      post.liked = !post.liked;
+
+      post.likes = post.liked ? 1 : 0;
+
+      updatePostLike(article, post);
+
+    });
+
+    article.appendChild(actions);
+
+
+    /* COMPTEUR */
+
+    const likes = document.createElement("div");
+
+    likes.className = "likes";
+
+    likes.innerHTML = `
+      <strong class="post-like-count">
+        ${post.likes} J’aime
+      </strong>
+    `;
+
+    article.appendChild(likes);
+
+
+    /* LÉGENDE */
+
+    const caption = document.createElement("div");
+
+    caption.className = "caption";
+
+    caption.innerHTML = `
+      <strong>prettygirls</strong>
+      Bienvenue sur PrettyGirls ❤️
+    `;
+
+    article.appendChild(caption);
+
+
+    return article;
+
+  }
+
+
+  /* =========================
      CARROUSEL
-  ======================================== */
+  ========================= */
 
-  function renderCarousel() {
+  function createCarousel(post, media) {
 
-    carousel.classList.add("active");
+    const carousel =
+      document.createElement("div");
 
-    selectedImages.forEach((image, index) => {
+    carousel.className = "post-carousel";
 
-      const slide = document.createElement("div");
 
-      slide.className = "carousel-slide";
+    const track =
+      document.createElement("div");
 
-      const img = document.createElement("img");
+    track.className = "post-carousel-track";
 
-      img.src = image.url;
-      img.alt = `Photo ${index + 1}`;
 
-      slide.appendChild(img);
+    post.images.forEach((image, index) => {
 
-      carouselTrack.appendChild(slide);
-
-
-      const dot = document.createElement("span");
-
-      dot.className =
-        index === 0
-          ? "carousel-dot active"
-          : "carousel-dot";
-
-      carouselDots.appendChild(dot);
-
-    });
-
-    updateCarousel();
-
-    if (selectedImages.length <= 1) {
-
-      carouselPrev.style.display = "none";
-      carouselNext.style.display = "none";
-      carouselCounter.style.display = "none";
-      carouselDots.style.display = "none";
-
-    } else {
-
-      carouselPrev.style.display = "";
-      carouselNext.style.display = "";
-      carouselCounter.style.display = "";
-      carouselDots.style.display = "flex";
-
-    }
-
-  }
-
-
-  /* ========================================
-     MISE À JOUR CARROUSEL
-  ======================================== */
-
-  function updateCarousel() {
-
-    if (!selectedImages.length) return;
-
-    carouselCounter.textContent =
-      `${currentIndex + 1}/${selectedImages.length}`;
-
-    const dots =
-      carouselDots.querySelectorAll(".carousel-dot");
-
-    dots.forEach((dot, index) => {
-
-      dot.classList.toggle(
-        "active",
-        index === currentIndex
-      );
-
-    });
-
-    carouselPrev.style.visibility =
-      currentIndex === 0
-        ? "hidden"
-        : "visible";
-
-    carouselNext.style.visibility =
-      currentIndex === selectedImages.length - 1
-        ? "hidden"
-        : "visible";
-
-  }
-
-
-  /* ========================================
-     FLÈCHE GAUCHE
-  ======================================== */
-
-  carouselPrev.addEventListener("click", (event) => {
-
-    event.stopPropagation();
-
-    if (currentIndex <= 0) return;
-
-    currentIndex--;
-
-    scrollFeedCarousel();
-
-  });
-
-
-  /* ========================================
-     FLÈCHE DROITE
-  ======================================== */
-
-  carouselNext.addEventListener("click", (event) => {
-
-    event.stopPropagation();
-
-    if (
-      currentIndex >=
-      selectedImages.length - 1
-    ) return;
-
-    currentIndex++;
-
-    scrollFeedCarousel();
-
-  });
-
-
-  function scrollFeedCarousel() {
-
-    carouselTrack.scrollTo({
-      left:
-        carouselTrack.clientWidth *
-        currentIndex,
-      behavior: "smooth"
-    });
-
-    updateCarousel();
-
-  }
-
-
-  /* ========================================
-     BALAYAGE AU DOIGT DU CARROUSEL
-  ======================================== */
-
-  let carouselScrollTimer;
-
-  carouselTrack.addEventListener("scroll", () => {
-
-    clearTimeout(carouselScrollTimer);
-
-    carouselScrollTimer = setTimeout(() => {
-
-      if (!carouselTrack.clientWidth) return;
-
-      currentIndex = Math.round(
-        carouselTrack.scrollLeft /
-        carouselTrack.clientWidth
-      );
-
-      currentIndex = Math.max(
-        0,
-        Math.min(
-          currentIndex,
-          selectedImages.length - 1
-        )
-      );
-
-      updateCarousel();
-
-    }, 80);
-
-  });
-
-
-  /* ========================================
-     GRILLE
-  ======================================== */
-
-  function renderGrid() {
-
-    const total = selectedImages.length;
-
-    if (total === 1) {
-      mediaGrid.classList.add("active", "grid-1");
-    }
-
-    else if (total === 2) {
-      mediaGrid.classList.add("active", "grid-2");
-    }
-
-    else if (total === 3) {
-      mediaGrid.classList.add("active", "grid-3");
-    }
-
-    else if (total === 4) {
-      mediaGrid.classList.add("active", "grid-4");
-    }
-
-    else {
-      mediaGrid.classList.add(
-        "active",
-        "grid-many"
-      );
-    }
-
-
-    const visibleImages =
-      total > 4
-        ? selectedImages.slice(0, 4)
-        : selectedImages;
-
-
-    visibleImages.forEach((image, index) => {
-
-      const item =
+      const slide =
         document.createElement("div");
 
-      item.className = "grid-item";
-
-      item.dataset.index = index;
+      slide.className = "post-slide";
 
 
       const img =
         document.createElement("img");
 
       img.src = image.url;
+
       img.alt = `Photo ${index + 1}`;
+
+
+      slide.appendChild(img);
+
+      track.appendChild(slide);
+
+    });
+
+
+    carousel.appendChild(track);
+
+
+    /* UNE SEULE PHOTO */
+
+    if (post.images.length === 1) {
+
+      track.addEventListener("click", () => {
+
+        openViewer(post, 0);
+
+      });
+
+      media.appendChild(carousel);
+
+      return;
+
+    }
+
+
+    /* COMPTEUR */
+
+    const counter =
+      document.createElement("div");
+
+    counter.className = "carousel-counter";
+
+    counter.textContent =
+      `1/${post.images.length}`;
+
+    carousel.appendChild(counter);
+
+
+    /* POINTS */
+
+    const dots =
+      document.createElement("div");
+
+    dots.className = "carousel-dots";
+
+
+    post.images.forEach((image, index) => {
+
+      const dot =
+        document.createElement("span");
+
+      dot.className =
+        index === 0
+          ? "carousel-dot active"
+          : "carousel-dot";
+
+      dots.appendChild(dot);
+
+    });
+
+
+    carousel.appendChild(dots);
+
+
+    /* FLÈCHES */
+
+    const prev =
+      document.createElement("button");
+
+    prev.className =
+      "carousel-arrow carousel-prev";
+
+    prev.type = "button";
+
+    prev.textContent = "‹";
+
+
+    const next =
+      document.createElement("button");
+
+    next.className =
+      "carousel-arrow carousel-next";
+
+    next.type = "button";
+
+    next.textContent = "›";
+
+
+    carousel.appendChild(prev);
+    carousel.appendChild(next);
+
+
+    function updateCarousel() {
+
+      counter.textContent =
+        `${post.currentIndex + 1}/${post.images.length}`;
+
+      const allDots =
+        dots.querySelectorAll(".carousel-dot");
+
+      allDots.forEach((dot, index) => {
+
+        dot.classList.toggle(
+          "active",
+          index === post.currentIndex
+        );
+
+      });
+
+
+      prev.style.visibility =
+        post.currentIndex === 0
+          ? "hidden"
+          : "visible";
+
+
+      next.style.visibility =
+        post.currentIndex ===
+        post.images.length - 1
+          ? "hidden"
+          : "visible";
+
+    }
+
+
+    prev.addEventListener("click", event => {
+
+      event.stopPropagation();
+
+      if (post.currentIndex <= 0) return;
+
+      post.currentIndex--;
+
+      track.scrollTo({
+
+        left:
+          track.clientWidth *
+          post.currentIndex,
+
+        behavior: "smooth"
+
+      });
+
+      updateCarousel();
+
+    });
+
+
+    next.addEventListener("click", event => {
+
+      event.stopPropagation();
+
+      if (
+        post.currentIndex >=
+        post.images.length - 1
+      ) return;
+
+      post.currentIndex++;
+
+      track.scrollTo({
+
+        left:
+          track.clientWidth *
+          post.currentIndex,
+
+        behavior: "smooth"
+
+      });
+
+      updateCarousel();
+
+    });
+
+
+    let scrollTimer;
+
+    track.addEventListener("scroll", () => {
+
+      clearTimeout(scrollTimer);
+
+      scrollTimer = setTimeout(() => {
+
+        if (!track.clientWidth) return;
+
+        post.currentIndex =
+          Math.round(
+            track.scrollLeft /
+            track.clientWidth
+          );
+
+        post.currentIndex =
+          Math.max(
+            0,
+            Math.min(
+              post.currentIndex,
+              post.images.length - 1
+            )
+          );
+
+        updateCarousel();
+
+      }, 70);
+
+    });
+
+
+    track.addEventListener("click", event => {
+
+      if (
+        event.target.closest(".carousel-arrow")
+      ) return;
+
+      openViewer(
+        post,
+        post.currentIndex
+      );
+
+    });
+
+
+    updateCarousel();
+
+    media.appendChild(carousel);
+
+  }
+
+
+  /* =========================
+     GRILLE
+  ========================= */
+
+  function createGrid(post, media) {
+
+    const grid =
+      document.createElement("div");
+
+    const total = post.images.length;
+
+
+    if (total === 1) {
+
+      grid.className =
+        "post-grid grid-1";
+
+    }
+
+    else if (total === 2) {
+
+      grid.className =
+        "post-grid grid-2";
+
+    }
+
+    else if (total === 3) {
+
+      grid.className =
+        "post-grid grid-3";
+
+    }
+
+    else if (total === 4) {
+
+      grid.className =
+        "post-grid grid-4";
+
+    }
+
+    else {
+
+      grid.className =
+        "post-grid grid-many";
+
+    }
+
+
+    const visible =
+      total > 4
+        ? post.images.slice(0, 4)
+        : post.images;
+
+
+    visible.forEach((image, index) => {
+
+      const item =
+        document.createElement("div");
+
+      item.className = "grid-item";
+
+
+      const img =
+        document.createElement("img");
+
+      img.src = image.url;
+
+      img.alt = `Photo ${index + 1}`;
+
 
       item.appendChild(img);
 
@@ -437,34 +696,74 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
 
-      item.addEventListener(
-        "click",
-        (event) => {
+      item.addEventListener("click", () => {
 
-          event.stopPropagation();
+        openViewer(post, index);
 
-          openFullViewer(index);
-
-        }
-      );
+      });
 
 
-      mediaGrid.appendChild(item);
+      grid.appendChild(item);
 
     });
+
+
+    media.appendChild(grid);
 
   }
 
 
-  /* ========================================
-     CRÉER LE VIEWER
-  ======================================== */
+  /* =========================
+     LIKE D'UNE PUBLICATION
+  ========================= */
 
-  function renderViewer() {
+  function updatePostLike(article, post) {
 
-    viewerCarouselTrack.innerHTML = "";
+    const button =
+      article.querySelector(".like-btn");
 
-    selectedImages.forEach((image, index) => {
+    const counter =
+      article.querySelector(
+        ".post-like-count"
+      );
+
+
+    button.classList.toggle(
+      "liked",
+      post.liked
+    );
+
+
+    counter.textContent =
+      `${post.likes} J’aime`;
+
+
+    if (
+      activePost &&
+      activePost.id === post.id
+    ) {
+
+      updateViewerLike();
+
+    }
+
+  }
+
+
+  /* =========================
+     OUVRIR VIEWER
+  ========================= */
+
+  function openViewer(post, index) {
+
+    activePost = post;
+
+    viewerIndex = index;
+
+    viewerTrack.innerHTML = "";
+
+
+    post.images.forEach((image, i) => {
 
       const slide =
         document.createElement("div");
@@ -476,45 +775,16 @@ document.addEventListener("DOMContentLoaded", () => {
         document.createElement("img");
 
       img.src = image.url;
-      img.alt = `Photo ${index + 1}`;
+
+      img.alt = `Photo ${i + 1}`;
 
 
       slide.appendChild(img);
 
-      viewerCarouselTrack.appendChild(slide);
+      viewerTrack.appendChild(slide);
 
     });
 
-    updateViewer();
-
-  }
-
-
-  /* ========================================
-     OUVRIR PLEIN ÉCRAN
-  ======================================== */
-
-  openViewer.addEventListener(
-    "click",
-    (event) => {
-
-      if (!selectedImages.length) return;
-
-      if (
-        event.target.closest(
-          ".carousel-arrow"
-        )
-      ) return;
-
-      openFullViewer(currentIndex);
-
-    }
-  );
-
-
-  function openFullViewer(index = 0) {
-
-    viewerIndex = index;
 
     viewer.classList.add("open");
 
@@ -523,83 +793,82 @@ document.addEventListener("DOMContentLoaded", () => {
 
     requestAnimationFrame(() => {
 
-      viewerCarouselTrack.scrollLeft =
-        viewerCarouselTrack.clientWidth *
+      viewerTrack.scrollLeft =
+        viewerTrack.clientWidth *
         viewerIndex;
 
       updateViewer();
 
     });
 
+
+    updateViewerLike();
+
   }
 
 
-  /* ========================================
+  /* =========================
      FERMER VIEWER
-  ======================================== */
+  ========================= */
 
-  closeViewer.addEventListener(
-    "click",
-    () => {
+  closeViewer.addEventListener("click", () => {
 
-      viewer.classList.remove("open");
+    viewer.classList.remove("open");
 
-      document.body.style.overflow = "";
+    document.body.style.overflow = "";
 
-    }
-  );
+    activePost = null;
 
-
-  /* ========================================
-     VIEWER - PHOTO PRÉCÉDENTE
-  ======================================== */
-
-  viewerPrev.addEventListener(
-    "click",
-    (event) => {
-
-      event.stopPropagation();
-
-      if (viewerIndex <= 0) return;
-
-      viewerIndex--;
-
-      scrollViewer();
-
-    }
-  );
+  });
 
 
-  /* ========================================
-     VIEWER - PHOTO SUIVANTE
-  ======================================== */
+  /* =========================
+     VIEWER PRÉCÉDENT
+  ========================= */
 
-  viewerNext.addEventListener(
-    "click",
-    (event) => {
+  viewerPrev.addEventListener("click", () => {
 
-      event.stopPropagation();
+    if (!activePost) return;
 
-      if (
-        viewerIndex >=
-        selectedImages.length - 1
-      ) return;
+    if (viewerIndex <= 0) return;
 
-      viewerIndex++;
+    viewerIndex--;
 
-      scrollViewer();
+    scrollViewer();
 
-    }
-  );
+  });
+
+
+  /* =========================
+     VIEWER SUIVANT
+  ========================= */
+
+  viewerNext.addEventListener("click", () => {
+
+    if (!activePost) return;
+
+    if (
+      viewerIndex >=
+      activePost.images.length - 1
+    ) return;
+
+    viewerIndex++;
+
+    scrollViewer();
+
+  });
 
 
   function scrollViewer() {
 
-    viewerCarouselTrack.scrollTo({
+    viewerTrack.scrollTo({
+
       left:
-        viewerCarouselTrack.clientWidth *
+        viewerTrack.clientWidth *
         viewerIndex,
+
       behavior: "smooth"
+
     });
 
     updateViewer();
@@ -607,156 +876,152 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
-  /* ========================================
+  /* =========================
      BALAYAGE VIEWER
-  ======================================== */
+  ========================= */
 
   let viewerScrollTimer;
 
-  viewerCarouselTrack.addEventListener(
-    "scroll",
-    () => {
+  viewerTrack.addEventListener("scroll", () => {
 
-      clearTimeout(viewerScrollTimer);
+    clearTimeout(viewerScrollTimer);
 
-      viewerScrollTimer = setTimeout(() => {
+    viewerScrollTimer = setTimeout(() => {
 
-        if (
-          !viewerCarouselTrack.clientWidth
-        ) return;
+      if (
+        !activePost ||
+        !viewerTrack.clientWidth
+      ) return;
 
-        viewerIndex = Math.round(
-          viewerCarouselTrack.scrollLeft /
-          viewerCarouselTrack.clientWidth
+
+      viewerIndex =
+        Math.round(
+          viewerTrack.scrollLeft /
+          viewerTrack.clientWidth
         );
 
-        viewerIndex = Math.max(
+
+      viewerIndex =
+        Math.max(
           0,
           Math.min(
             viewerIndex,
-            selectedImages.length - 1
+            activePost.images.length - 1
           )
         );
 
-        updateViewer();
 
-      }, 80);
+      updateViewer();
 
-    }
-  );
+    }, 70);
+
+  });
 
 
-  /* ========================================
+  /* =========================
      MISE À JOUR VIEWER
-  ======================================== */
+  ========================= */
 
   function updateViewer() {
 
-    if (!selectedImages.length) return;
+    if (!activePost) return;
+
+    const total =
+      activePost.images.length;
+
 
     viewerCounter.textContent =
-      `${viewerIndex + 1}/${selectedImages.length}`;
+      `${viewerIndex + 1}/${total}`;
 
 
-    if (selectedImages.length <= 1) {
+    if (total <= 1) {
 
       viewerCounter.style.display = "none";
+
       viewerPrev.style.display = "none";
+
       viewerNext.style.display = "none";
 
-    }
-
-    else {
-
-      viewerCounter.style.display = "";
-      viewerPrev.style.display = "";
-      viewerNext.style.display = "";
-
-      viewerPrev.style.visibility =
-        viewerIndex === 0
-          ? "hidden"
-          : "visible";
-
-      viewerNext.style.visibility =
-        viewerIndex ===
-        selectedImages.length - 1
-          ? "hidden"
-          : "visible";
+      return;
 
     }
+
+
+    viewerCounter.style.display = "";
+
+    viewerPrev.style.display = "";
+
+    viewerNext.style.display = "";
+
+
+    viewerPrev.style.visibility =
+      viewerIndex === 0
+        ? "hidden"
+        : "visible";
+
+
+    viewerNext.style.visibility =
+      viewerIndex === total - 1
+        ? "hidden"
+        : "visible";
 
   }
 
 
-  /* ========================================
-     LIKE
-  ======================================== */
+  /* =========================
+     LIKE DANS VIEWER
+  ========================= */
 
-  function updateLike() {
+  viewerLike.addEventListener("click", () => {
 
-    feedLike.classList.toggle(
-      "liked",
-      liked
-    );
+    if (!activePost) return;
+
+    activePost.liked =
+      !activePost.liked;
+
+    activePost.likes =
+      activePost.liked ? 1 : 0;
+
+
+    updateViewerLike();
+
+
+    const article =
+      feed.querySelector(
+        `[data-post-id="${activePost.id}"]`
+      );
+
+
+    if (article) {
+
+      updatePostLike(
+        article,
+        activePost
+      );
+
+    }
+
+  });
+
+
+  function updateViewerLike() {
+
+    if (!activePost) return;
 
     viewerLike.classList.toggle(
       "liked",
-      liked
+      activePost.liked
     );
 
-    likeCount.textContent =
-      liked
-        ? "1 J’aime"
-        : "0 J’aime";
-
     viewerLikeCount.textContent =
-      liked
-        ? "1"
-        : "0";
+      activePost.likes;
 
   }
 
 
-  feedLike.addEventListener(
-    "click",
-    () => {
-
-      liked = !liked;
-
-      updateLike();
-
-    }
-  );
-
-
-  viewerLike.addEventListener(
-    "click",
-    () => {
-
-      liked = !liked;
-
-      updateLike();
-
-    }
-  );
-
-
-  /* ========================================
-     LIBÉRER LES ANCIENNES IMAGES
-  ======================================== */
-
-  function clearSelectedImages() {
-
-    selectedImages.forEach(image => {
-
-      URL.revokeObjectURL(image.url);
-
-    });
-
-    selectedImages = [];
-
-  }
-
+  /* =========================
+     NETTOYAGE
+  ========================= */
 
   function clearPendingImages() {
 
@@ -771,10 +1036,10 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
-  /* ========================================
-     ÉTAT INITIAL
-  ======================================== */
+  /* =========================
+     DÉMARRAGE
+  ========================= */
 
-  updateLike();
+  renderFeed();
 
 });
