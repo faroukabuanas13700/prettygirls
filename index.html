@@ -13,6 +13,7 @@
 
 <div id="app">
 
+  <!-- EN-TÊTE -->
   <header class="topbar">
 
     <div class="logo">
@@ -21,14 +22,16 @@
 
     <div class="top-actions">
 
-      <button class="icon-btn">
+      <button class="icon-btn" type="button">
         <svg viewBox="0 0 24 24">
           <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/>
         </svg>
+
         <span class="badge">3</span>
       </button>
 
-      <button class="icon-btn">
+
+      <button class="icon-btn" type="button">
         <svg viewBox="0 0 24 24">
           <path d="M22 2L9.5 14.5M22 2l-8 20-4.5-7.5L2 10l20-8z"/>
         </svg>
@@ -39,13 +42,21 @@
   </header>
 
 
+  <!-- ONGLETS -->
   <div class="tabs">
-    <button class="tab active">Pour toi</button>
-    <button class="tab">Abonnements</button>
+
+    <button class="tab active" type="button">
+      Pour toi
+    </button>
+
+    <button class="tab" type="button">
+      Abonnements
+    </button>
+
   </div>
 
 
-  <!-- LES PUBLICATIONS SERONT AJOUTÉES ICI -->
+  <!-- FEED -->
   <main class="feed" id="feed">
 
     <div class="empty-feed" id="emptyFeed">
@@ -65,10 +76,10 @@
   </main>
 
 
-  <!-- BARRE DU BAS -->
+  <!-- NAVIGATION BAS -->
   <nav class="bottom-nav">
 
-    <button class="nav-btn active">
+    <button class="nav-btn active" type="button">
 
       <svg viewBox="0 0 24 24">
         <path d="M3 10.5L12 3l9 7.5V21h-6v-6H9v6H3V10.5z"/>
@@ -79,7 +90,7 @@
     </button>
 
 
-    <button class="nav-btn">
+    <button class="nav-btn" type="button">
 
       <svg viewBox="0 0 24 24">
         <circle cx="11" cy="11" r="7"/>
@@ -100,7 +111,7 @@
     </button>
 
 
-    <button class="nav-btn">
+    <button class="nav-btn" type="button">
 
       <svg viewBox="0 0 24 24">
         <rect x="3" y="4" width="18" height="16" rx="3"/>
@@ -112,7 +123,7 @@
     </button>
 
 
-    <button class="nav-btn">
+    <button class="nav-btn" type="button">
 
       <div class="mini-avatar">P</div>
 
@@ -123,25 +134,172 @@
   </nav>
 
 
-  <!-- SÉLECTION PHOTOS -->
+  <!-- INPUT PHOTOS / VIDÉOS APPAREIL -->
   <input
     type="file"
     id="imagePicker"
-    accept="image/*"
+    accept="image/*,video/*"
     multiple
     hidden
   >
 
 
-  <!-- CHOIX CARROUSEL / GRILLE -->
+  <!-- ==============================
+       PREMIER CHOIX APRÈS LE +
+  =============================== -->
+  <div class="source-choice" id="sourceChoice">
+
+    <div class="source-choice-box">
+
+      <div class="sheet-handle"></div>
+
+      <h2>Nouvelle publication</h2>
+
+      <p>
+        Comment veux-tu ajouter tes médias ?
+      </p>
+
+
+      <button
+        class="source-btn"
+        id="chooseUpload"
+        type="button"
+      >
+
+        <div class="source-icon">
+          ↑
+        </div>
+
+        <div class="source-text">
+          <strong>Téléverser</strong>
+          <span>
+            Photos ou vidéos depuis ton appareil
+          </span>
+        </div>
+
+      </button>
+
+
+      <button
+        class="source-btn"
+        id="chooseExternal"
+        type="button"
+      >
+
+        <div class="source-icon">
+          &lt;/&gt;
+        </div>
+
+        <div class="source-text">
+          <strong>Médias externes</strong>
+          <span>
+            URL, iframe HTML ou BBCode
+          </span>
+        </div>
+
+      </button>
+
+
+      <button
+        class="cancel-source"
+        id="cancelSource"
+        type="button"
+      >
+        Annuler
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <!-- ==============================
+       MÉDIAS EXTERNES
+  =============================== -->
+  <div class="external-modal" id="externalModal">
+
+    <div class="external-box">
+
+      <div class="external-header">
+
+        <button
+          class="external-back"
+          id="externalBack"
+          type="button"
+        >
+          ‹
+        </button>
+
+        <strong>Médias externes</strong>
+
+        <div class="external-header-space"></div>
+
+      </div>
+
+
+      <p class="external-help">
+        Colle un ou plusieurs liens, iframes ou BBCode.
+        Tu peux mélanger plusieurs sites dans la même publication.
+      </p>
+
+
+      <textarea
+        id="externalInput"
+        class="external-input"
+        placeholder="Exemples :
+
+https://site.com/photo.jpg
+
+[img]https://site.com/photo2.jpg[/img]
+
+<iframe src=&quot;https://site.com/embed/video&quot;></iframe>"
+      ></textarea>
+
+
+      <div class="external-examples">
+
+        <span>Accepté :</span>
+
+        <small>
+          URL directe • &lt;img&gt; • &lt;video&gt; •
+          &lt;iframe&gt; • [img] • [video] • [url]
+        </small>
+
+      </div>
+
+
+      <div
+        class="external-error"
+        id="externalError"
+      ></div>
+
+
+      <button
+        class="external-continue"
+        id="externalContinue"
+        type="button"
+      >
+        Continuer
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <!-- ==============================
+       CHOIX CARROUSEL / GRILLE
+  =============================== -->
   <div class="publish-choice" id="publishChoice">
 
     <div class="publish-choice-box">
 
+      <div class="sheet-handle"></div>
+
       <h2>Créer une publication</h2>
 
       <p id="selectedCount">
-        Photos sélectionnées
+        Médias sélectionnés
       </p>
 
 
@@ -154,7 +312,7 @@
         <strong>Carrousel</strong>
 
         <span>
-          Faire défiler les photos une par une
+          Faire défiler les médias un par un
         </span>
 
       </button>
@@ -169,7 +327,7 @@
         <strong>Grille</strong>
 
         <span>
-          Afficher plusieurs photos ensemble
+          Afficher plusieurs médias ensemble
         </span>
 
       </button>
@@ -188,7 +346,9 @@
   </div>
 
 
-  <!-- VIEWER PLEIN ÉCRAN -->
+  <!-- ==============================
+       VIEWER PLEIN ÉCRAN
+  =============================== -->
   <div class="viewer" id="viewer">
 
     <div class="viewer-header">
@@ -212,6 +372,7 @@
         id="viewerTrack"
       ></div>
 
+
       <button
         class="viewer-arrow viewer-prev"
         id="viewerPrev"
@@ -220,6 +381,7 @@
         ‹
       </button>
 
+
       <button
         class="viewer-arrow viewer-next"
         id="viewerNext"
@@ -227,6 +389,7 @@
       >
         ›
       </button>
+
 
       <div
         class="viewer-counter"
@@ -253,7 +416,10 @@
       </button>
 
 
-      <button class="viewer-action">
+      <button
+        class="viewer-action"
+        type="button"
+      >
 
         <svg viewBox="0 0 24 24">
           <path d="M21 11.5a8.4 8.4 0 0 1-9 8.5 9.5 9.5 0 0 1-4-.9L3 21l1.7-4.6A8.5 8.5 0 1 1 21 11.5z"/>
@@ -262,7 +428,10 @@
       </button>
 
 
-      <button class="viewer-action">
+      <button
+        class="viewer-action"
+        type="button"
+      >
 
         <svg viewBox="0 0 24 24">
           <path d="M22 2L9.5 14.5M22 2l-8 20-4.5-7.5L2 10l20-8z"/>
@@ -271,7 +440,10 @@
       </button>
 
 
-      <button class="viewer-action">
+      <button
+        class="viewer-action"
+        type="button"
+      >
 
         <svg viewBox="0 0 24 24">
           <path d="M6 3h12v18l-6-4-6 4V3z"/>
