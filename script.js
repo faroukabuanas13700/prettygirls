@@ -6,6 +6,17 @@ document.addEventListener("DOMContentLoaded", () => {
   const createPost = document.getElementById("createPost");
   const imagePicker = document.getElementById("imagePicker");
 
+  const sourceChoice = document.getElementById("sourceChoice");
+  const chooseUpload = document.getElementById("chooseUpload");
+  const chooseExternal = document.getElementById("chooseExternal");
+  const cancelSource = document.getElementById("cancelSource");
+
+  const externalModal = document.getElementById("externalModal");
+  const externalBack = document.getElementById("externalBack");
+  const externalInput = document.getElementById("externalInput");
+  const externalContinue = document.getElementById("externalContinue");
+  const externalError = document.getElementById("externalError");
+
   const publishChoice = document.getElementById("publishChoice");
   const selectedCount = document.getElementById("selectedCount");
   const chooseCarousel = document.getElementById("chooseCarousel");
@@ -21,7 +32,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const viewerLike = document.getElementById("viewerLike");
   const viewerLikeCount = document.getElementById("viewerLikeCount");
 
-  let pendingImages = [];
+  let pendingMedia = [];
   let posts = [];
 
   let activePost = null;
@@ -62,97 +73,481 @@ document.addEventListener("DOMContentLoaded", () => {
   ======================================== */
 
   createPost.addEventListener("click", () => {
-    imagePicker.value = "";
-    imagePicker.click();
-  });
 
-
-  /* ========================================
-     SÉLECTION DES PHOTOS
-  ======================================== */
-
-  imagePicker.addEventListener("change", event => {
-
-    const files = Array.from(event.target.files);
-
-    if (!files.length) return;
-
-    clearPendingImages();
-
-    pendingImages = files.map(file => ({
-      file: file,
-      url: URL.createObjectURL(file)
-    }));
-
-    selectedCount.textContent =
-      pendingImages.length === 1
-        ? "1 photo sélectionnée"
-        : `${pendingImages.length} photos sélectionnées`;
-
-    publishChoice.classList.add("open");
+    sourceChoice.classList.add("open");
     document.body.style.overflow = "hidden";
 
   });
 
 
   /* ========================================
-     ANNULER
+     ANNULER CHOIX SOURCE
   ======================================== */
+
+  cancelSource.addEventListener("click", () => {
+
+    sourceChoice.classList.remove("open");
+    document.body.style.overflow = "";
+
+  });
+
+
+  /* ========================================
+     TÉLÉVERSER DEPUIS APPAREIL
+  ======================================== */
+
+  chooseUpload.addEventListener("click", () => {
+
+    sourceChoice.classList.remove("open");
+
+    imagePicker.value = "";
+
+    imagePicker.click();
+
+  });
+
+
+  imagePicker.addEventListener("change", event => {
+
+    const files = Array.from(event.target.files);
+
+    if (!files.length) {
+      document.body.style.overflow = "";
+      return;
+    }
+
+    clearPendingMedia();
+
+    pendingMedia = files.map(file => {
+
+      const isVideo =
+        file.type.startsWith("video/");
+
+      return {
+        type: isVideo ? "video" : "image",
+        url: URL.createObjectURL(file),
+        local: true,
+        file: file
+      };
+
+    });
+
+    openLayoutChoice();
+
+  });
+
+
+  /* ========================================
+     OUVRIR MÉDIAS EXTERNES
+  ======================================== */
+
+  chooseExternal.addEventListener("click", () => {
+
+    sourceChoice.classList.remove("open");
+
+    externalInput.value = "";
+    externalError.textContent = "";
+
+    externalModal.classList.add("open");
+
+  });
+
+
+  externalBack.addEventListener("click", () => {
+
+    externalModal.classList.remove("open");
+
+    sourceChoice.classList.add("open");
+
+  });
+
+
+  /* ========================================
+     ANALYSER MÉDIAS EXTERNES
+  ======================================== */
+
+  externalContinue.addEventListener("click", () => {
+
+    const text = externalInput.value.trim();
+
+    externalError.textContent = "";
+
+    if (!text) {
+
+      externalError.textContent =
+        "Colle au moins un lien, iframe ou BBCode.";
+
+      return;
+
+    }
+
+    const foundMedia =
+      parseExternalMedia(text);
+
+    if (!foundMedia.length) {
+
+      externalError.textContent =
+        "Aucun média valide détecté.";
+
+      return;
+
+    }
+
+    clearPendingMedia();
+
+    pendingMedia = foundMedia;
+
+    externalModal.classList.remove("open");
+
+    openLayoutChoice();
+
+  });
+
+
+  /* ========================================
+     EXTRAIRE LES MÉDIAS
+  ======================================== */
+
+  function parseExternalMedia(text) {
+
+    const results = [];
+    const used = new Set();
+
+
+    function addMedia(type, url) {
+
+      if (!url) return;
+
+      url = decodeHtml(url.trim());
+
+      if (!isSafeHttpUrl(url)) return;
+
+      const key = `${type}:${url}`;
+
+      if (used.has(key)) return;
+
+      used.add(key);
+
+      results.push({
+        type: type,
+        url: url,
+        local: false
+      });
+
+    }
+
+
+    /* -------------------------
+       BBCode [img]
+    ------------------------- */
+
+    const imgBB =
+      /\[img(?:=[^\]]*)?\]([\s\S]*?)\[\/img\]/gi;
+
+    let match;
+
+    while ((match = imgBB.exec(text)) !== null) {
+
+      addMedia(
+        "image",
+        match[1]
+      );
+
+    }
+
+
+    /* -------------------------
+       BBCode [video]
+    ------------------------- */
+
+    const videoBB =
+      /\[video(?:=[^\]]*)?\]([\s\S]*?)\[\/video\]/gi;
+
+    while ((match = videoBB.exec(text)) !== null) {
+
+      addMedia(
+        detectUrlType(match[1], "video"),
+        match[1]
+      );
+
+    }
+
+
+    /* -------------------------
+       BBCode [url]
+    ------------------------- */
+
+    const urlBB =
+      /\[url(?:=([^\]]+))?\]([\s\S]*?)\[\/url\]/gi;
+
+    while ((match = urlBB.exec(text)) !== null) {
+
+      const url =
+        match[1] || match[2];
+
+      addMedia(
+        detectUrlType(url),
+        url
+      );
+
+    }
+
+
+    /* -------------------------
+       HTML
+    ------------------------- */
+
+    const parser =
+      new DOMParser();
+
+    const doc =
+      parser.parseFromString(
+        text,
+        "text/html"
+      );
+
+
+    doc.querySelectorAll("img").forEach(element => {
+
+      addMedia(
+        "image",
+        element.getAttribute("src")
+      );
+
+    });
+
+
+    doc.querySelectorAll("video").forEach(element => {
+
+      const src =
+        element.getAttribute("src") ||
+        element.querySelector("source")?.getAttribute("src");
+
+      addMedia(
+        "video",
+        src
+      );
+
+    });
+
+
+    doc.querySelectorAll("iframe").forEach(element => {
+
+      addMedia(
+        "iframe",
+        element.getAttribute("src")
+      );
+
+    });
+
+
+    /* -------------------------
+       URLS BRUTES
+    ------------------------- */
+
+    const cleanedText = text
+      .replace(/\[img(?:=[^\]]*)?\][\s\S]*?\[\/img\]/gi, " ")
+      .replace(/\[video(?:=[^\]]*)?\][\s\S]*?\[\/video\]/gi, " ")
+      .replace(/\[url(?:=[^\]]+)?\][\s\S]*?\[\/url\]/gi, " ")
+      .replace(/<img\b[^>]*>/gi, " ")
+      .replace(/<video\b[\s\S]*?<\/video>/gi, " ")
+      .replace(/<iframe\b[\s\S]*?<\/iframe>/gi, " ");
+
+
+    const rawUrls =
+      cleanedText.match(
+        /https?:\/\/[^\s<>"'\]]+/gi
+      ) || [];
+
+
+    rawUrls.forEach(url => {
+
+      url = url.replace(
+        /[),.;]+$/,
+        ""
+      );
+
+      addMedia(
+        detectUrlType(url),
+        url
+      );
+
+    });
+
+
+    return results;
+
+  }
+
+
+  /* ========================================
+     DÉTECTER TYPE D'UNE URL
+  ======================================== */
+
+  function detectUrlType(
+    url,
+    fallback = "iframe"
+  ) {
+
+    if (!url) return fallback;
+
+    const clean =
+      url.split("?")[0]
+        .split("#")[0]
+        .toLowerCase();
+
+
+    if (
+      /\.(jpg|jpeg|png|gif|webp|avif|bmp|svg)$/i.test(clean)
+    ) {
+
+      return "image";
+
+    }
+
+
+    if (
+      /\.(mp4|webm|ogg|ogv|mov|m4v)$/i.test(clean)
+    ) {
+
+      return "video";
+
+    }
+
+
+    return fallback;
+
+  }
+
+
+  /* ========================================
+     URL HTTP/HTTPS UNIQUEMENT
+  ======================================== */
+
+  function isSafeHttpUrl(url) {
+
+    try {
+
+      const parsed =
+        new URL(url);
+
+      return (
+        parsed.protocol === "https:" ||
+        parsed.protocol === "http:"
+      );
+
+    } catch {
+
+      return false;
+
+    }
+
+  }
+
+
+  /* ========================================
+     DÉCODER &amp; ETC.
+  ======================================== */
+
+  function decodeHtml(value) {
+
+    const textarea =
+      document.createElement("textarea");
+
+    textarea.innerHTML = value;
+
+    return textarea.value;
+
+  }
+
+
+  /* ========================================
+     CHOIX CARROUSEL / GRILLE
+  ======================================== */
+
+  function openLayoutChoice() {
+
+    const total =
+      pendingMedia.length;
+
+    selectedCount.textContent =
+      total === 1
+        ? "1 média sélectionné"
+        : `${total} médias sélectionnés`;
+
+    publishChoice.classList.add("open");
+
+    document.body.style.overflow = "hidden";
+
+  }
+
 
   cancelPublish.addEventListener("click", () => {
 
     publishChoice.classList.remove("open");
+
     document.body.style.overflow = "";
 
-    clearPendingImages();
+    clearPendingMedia();
 
   });
 
-
-  /* ========================================
-     CARROUSEL / GRILLE
-  ======================================== */
 
   chooseCarousel.addEventListener("click", () => {
+
     createNewPost("carousel");
+
   });
 
+
   chooseGrid.addEventListener("click", () => {
+
     createNewPost("grid");
+
   });
 
 
   /* ========================================
-     CRÉER UNE NOUVELLE PUBLICATION
+     CRÉER PUBLICATION
   ======================================== */
 
-  function createNewPost(type) {
+  function createNewPost(layout) {
 
-    if (!pendingImages.length) return;
+    if (!pendingMedia.length) return;
+
 
     const post = {
+
       id:
         Date.now().toString() +
-        Math.random().toString(16).slice(2),
+        Math.random()
+          .toString(16)
+          .slice(2),
 
-      type: type,
+      layout: layout,
 
-      images: pendingImages.map(image => ({
-        file: image.file,
-        url: image.url
+      media: pendingMedia.map(item => ({
+        ...item
       })),
 
       liked: false,
+
       likes: 0,
+
       currentIndex: 0
+
     };
 
-    pendingImages = [];
+
+    pendingMedia = [];
 
     posts.unshift(post);
 
+
     publishChoice.classList.remove("open");
+
     document.body.style.overflow = "";
+
 
     renderFeed();
 
@@ -160,28 +555,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
   /* ========================================
-     AFFICHER LE FEED
+     AFFICHER FEED
   ======================================== */
 
   function renderFeed() {
 
-    /*
-      IMPORTANT :
-      on supprime seulement les anciennes publications.
-      On ne détruit plus emptyFeed.
-    */
-
-    const oldPosts =
-      feed.querySelectorAll(".post");
-
-    oldPosts.forEach(postElement => {
-      postElement.remove();
-    });
+    feed
+      .querySelectorAll(".post")
+      .forEach(element => {
+        element.remove();
+      });
 
 
     if (!posts.length) {
 
       emptyFeed.classList.remove("hidden");
+
       return;
 
     }
@@ -192,10 +581,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     posts.forEach(post => {
 
-      const article =
-        createPostElement(post);
-
-      feed.appendChild(article);
+      feed.appendChild(
+        createPostElement(post)
+      );
 
     });
 
@@ -203,7 +591,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
   /* ========================================
-     CRÉER UNE PUBLICATION
+     CRÉER POST
   ======================================== */
 
   function createPostElement(post) {
@@ -212,15 +600,18 @@ document.addEventListener("DOMContentLoaded", () => {
       document.createElement("article");
 
     article.className = "post";
-    article.dataset.postId = post.id;
+
+    article.dataset.postId =
+      post.id;
 
 
-    /* ---------- EN-TÊTE ---------- */
+    /* EN-TÊTE */
 
     const header =
       document.createElement("div");
 
-    header.className = "post-header";
+    header.className =
+      "post-header";
 
     header.innerHTML = `
       <div class="avatar">P</div>
@@ -240,34 +631,44 @@ document.addEventListener("DOMContentLoaded", () => {
     article.appendChild(header);
 
 
-    /* ---------- MÉDIA ---------- */
+    /* MÉDIAS */
 
-    const media =
+    const mediaContainer =
       document.createElement("div");
 
-    media.className = "post-media";
+    mediaContainer.className =
+      "post-media";
 
 
-    if (post.type === "carousel") {
+    if (post.layout === "grid") {
 
-      createCarousel(post, media);
+      createGrid(
+        post,
+        mediaContainer
+      );
 
     } else {
 
-      createGrid(post, media);
+      createCarousel(
+        post,
+        mediaContainer
+      );
 
     }
 
 
-    article.appendChild(media);
+    article.appendChild(
+      mediaContainer
+    );
 
 
-    /* ---------- ACTIONS ---------- */
+    /* ACTIONS */
 
     const actions =
       document.createElement("div");
 
-    actions.className = "post-actions";
+    actions.className =
+      "post-actions";
 
     actions.innerHTML = `
       <div class="left-actions">
@@ -307,17 +708,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     const likeButton =
-      actions.querySelector(".like-btn");
+      actions.querySelector(
+        ".like-btn"
+      );
 
 
     likeButton.addEventListener(
       "click",
       () => {
 
-        post.liked = !post.liked;
-        post.likes = post.liked ? 1 : 0;
+        post.liked =
+          !post.liked;
 
-        updatePostLike(article, post);
+        post.likes =
+          post.liked ? 1 : 0;
+
+        updatePostLike(
+          article,
+          post
+        );
 
       }
     );
@@ -326,7 +735,7 @@ document.addEventListener("DOMContentLoaded", () => {
     article.appendChild(actions);
 
 
-    /* ---------- NOMBRE DE LIKES ---------- */
+    /* LIKES */
 
     const likes =
       document.createElement("div");
@@ -342,12 +751,13 @@ document.addEventListener("DOMContentLoaded", () => {
     article.appendChild(likes);
 
 
-    /* ---------- LÉGENDE ---------- */
+    /* LÉGENDE */
 
     const caption =
       document.createElement("div");
 
-    caption.className = "caption";
+    caption.className =
+      "caption";
 
     caption.innerHTML = `
       <strong>prettygirls</strong>
@@ -363,68 +773,148 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
   /* ========================================
-     CRÉER LE CARROUSEL
+     CRÉER UN ÉLÉMENT MÉDIA
   ======================================== */
 
-  function createCarousel(post, media) {
+  function createMediaElement(
+    item,
+    viewerMode = false
+  ) {
+
+    let element;
+
+
+    if (item.type === "image") {
+
+      element =
+        document.createElement("img");
+
+      element.src = item.url;
+
+      element.alt = "Publication PrettyGirls";
+
+      element.loading = "lazy";
+
+      return element;
+
+    }
+
+
+    if (item.type === "video") {
+
+      element =
+        document.createElement("video");
+
+      element.src = item.url;
+
+      element.controls = true;
+
+      element.playsInline = true;
+
+      element.preload = "metadata";
+
+      return element;
+
+    }
+
+
+    element =
+      document.createElement("iframe");
+
+    element.src = item.url;
+
+    element.allowFullscreen = true;
+
+    element.loading = "lazy";
+
+    element.referrerPolicy =
+      "strict-origin-when-cross-origin";
+
+    element.setAttribute(
+      "allow",
+      "autoplay; fullscreen; picture-in-picture"
+    );
+
+    return element;
+
+  }
+
+
+  /* ========================================
+     CARROUSEL
+  ======================================== */
+
+  function createCarousel(
+    post,
+    container
+  ) {
 
     const carousel =
       document.createElement("div");
 
-    carousel.className = "post-carousel";
+    carousel.className =
+      "post-carousel";
 
 
     const track =
       document.createElement("div");
 
-    track.className = "post-carousel-track";
+    track.className =
+      "post-carousel-track";
 
 
-    post.images.forEach((image, index) => {
+    post.media.forEach(
+      (item, index) => {
 
-      const slide =
-        document.createElement("div");
+        const slide =
+          document.createElement("div");
 
-      slide.className = "post-slide";
-
-
-      const img =
-        document.createElement("img");
-
-      img.src = image.url;
-      img.alt = `Photo ${index + 1}`;
+        slide.className =
+          "post-slide";
 
 
-      slide.appendChild(img);
-      track.appendChild(slide);
+        const element =
+          createMediaElement(item);
 
-    });
+
+        slide.appendChild(element);
+
+        track.appendChild(slide);
+
+
+        if (item.type !== "iframe") {
+
+          element.addEventListener(
+            "click",
+            () => {
+
+              openFullViewer(
+                post,
+                index
+              );
+
+            }
+          );
+
+        }
+
+      }
+    );
 
 
     carousel.appendChild(track);
 
 
-    /* UNE SEULE PHOTO */
+    if (post.media.length === 1) {
 
-    if (post.images.length === 1) {
-
-      track.addEventListener(
-        "click",
-        () => {
-
-          openFullViewer(post, 0);
-
-        }
+      container.appendChild(
+        carousel
       );
-
-      media.appendChild(carousel);
 
       return;
 
     }
 
-
-    /* COMPTEUR */
 
     const counter =
       document.createElement("div");
@@ -433,19 +923,15 @@ document.addEventListener("DOMContentLoaded", () => {
       "carousel-counter";
 
 
-    carousel.appendChild(counter);
-
-
-    /* POINTS */
-
     const dots =
       document.createElement("div");
 
-    dots.className = "carousel-dots";
+    dots.className =
+      "carousel-dots";
 
 
-    post.images.forEach(
-      (image, index) => {
+    post.media.forEach(
+      (item, index) => {
 
         const dot =
           document.createElement("span");
@@ -461,59 +947,53 @@ document.addEventListener("DOMContentLoaded", () => {
     );
 
 
-    carousel.appendChild(dots);
-
-
-    /* FLÈCHE GAUCHE */
-
     const prev =
       document.createElement("button");
+
+    prev.type = "button";
 
     prev.className =
       "carousel-arrow carousel-prev";
 
-    prev.type = "button";
     prev.textContent = "‹";
 
-
-    /* FLÈCHE DROITE */
 
     const next =
       document.createElement("button");
 
+    next.type = "button";
+
     next.className =
       "carousel-arrow carousel-next";
 
-    next.type = "button";
     next.textContent = "›";
 
 
+    carousel.appendChild(counter);
+    carousel.appendChild(dots);
     carousel.appendChild(prev);
     carousel.appendChild(next);
 
 
-    function updateCarousel() {
+    function update() {
 
       counter.textContent =
-        `${post.currentIndex + 1}/${post.images.length}`;
+        `${post.currentIndex + 1}/${post.media.length}`;
 
 
-      const allDots =
-        dots.querySelectorAll(
-          ".carousel-dot"
+      dots
+        .querySelectorAll(".carousel-dot")
+        .forEach(
+          (dot, index) => {
+
+            dot.classList.toggle(
+              "active",
+              index ===
+              post.currentIndex
+            );
+
+          }
         );
-
-
-      allDots.forEach(
-        (dot, index) => {
-
-          dot.classList.toggle(
-            "active",
-            index === post.currentIndex
-          );
-
-        }
-      );
 
 
       prev.style.visibility =
@@ -524,14 +1004,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
       next.style.visibility =
         post.currentIndex ===
-        post.images.length - 1
+        post.media.length - 1
           ? "hidden"
           : "visible";
 
     }
 
-
-    /* FLÈCHE GAUCHE */
 
     prev.addEventListener(
       "click",
@@ -539,9 +1017,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
         event.stopPropagation();
 
-        if (post.currentIndex <= 0) {
-          return;
-        }
+        if (
+          post.currentIndex <= 0
+        ) return;
 
         post.currentIndex--;
 
@@ -553,13 +1031,11 @@ document.addEventListener("DOMContentLoaded", () => {
           behavior: "smooth"
         });
 
-        updateCarousel();
+        update();
 
       }
     );
 
-
-    /* FLÈCHE DROITE */
 
     next.addEventListener(
       "click",
@@ -569,10 +1045,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (
           post.currentIndex >=
-          post.images.length - 1
-        ) {
-          return;
-        }
+          post.media.length - 1
+        ) return;
 
         post.currentIndex++;
 
@@ -584,23 +1058,22 @@ document.addEventListener("DOMContentLoaded", () => {
           behavior: "smooth"
         });
 
-        updateCarousel();
+        update();
 
       }
     );
 
 
-    /* BALAYAGE */
+    let timer;
 
-    let scrollTimer;
 
     track.addEventListener(
       "scroll",
       () => {
 
-        clearTimeout(scrollTimer);
+        clearTimeout(timer);
 
-        scrollTimer = setTimeout(
+        timer = setTimeout(
           () => {
 
             if (!track.clientWidth) {
@@ -619,12 +1092,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 0,
                 Math.min(
                   post.currentIndex,
-                  post.images.length - 1
+                  post.media.length - 1
                 )
               );
 
 
-            updateCarousel();
+            update();
 
           },
           80
@@ -634,39 +1107,29 @@ document.addEventListener("DOMContentLoaded", () => {
     );
 
 
-    /* OUVRIR EN GRAND */
+    update();
 
-    track.addEventListener(
-      "click",
-      () => {
-
-        openFullViewer(
-          post,
-          post.currentIndex
-        );
-
-      }
+    container.appendChild(
+      carousel
     );
-
-
-    updateCarousel();
-
-    media.appendChild(carousel);
 
   }
 
 
   /* ========================================
-     CRÉER LA GRILLE
+     GRILLE
   ======================================== */
 
-  function createGrid(post, media) {
+  function createGrid(
+    post,
+    container
+  ) {
 
     const grid =
       document.createElement("div");
 
     const total =
-      post.images.length;
+      post.media.length;
 
 
     if (total === 1) {
@@ -697,29 +1160,27 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 
-    const visibleImages =
+    const visible =
       total > 4
-        ? post.images.slice(0, 4)
-        : post.images;
+        ? post.media.slice(0, 4)
+        : post.media;
 
 
-    visibleImages.forEach(
-      (image, index) => {
+    visible.forEach(
+      (item, index) => {
 
-        const item =
+        const box =
           document.createElement("div");
 
-        item.className = "grid-item";
+        box.className =
+          "grid-item";
 
 
-        const img =
-          document.createElement("img");
-
-        img.src = image.url;
-        img.alt = `Photo ${index + 1}`;
+        const element =
+          createMediaElement(item);
 
 
-        item.appendChild(img);
+        box.appendChild(element);
 
 
         if (
@@ -730,42 +1191,47 @@ document.addEventListener("DOMContentLoaded", () => {
           const more =
             document.createElement("div");
 
-          more.className = "grid-more";
+          more.className =
+            "grid-more";
 
           more.textContent =
             `+${total - 4}`;
 
-          item.appendChild(more);
+          box.appendChild(more);
 
         }
 
 
-        item.addEventListener(
-          "click",
-          () => {
+        if (item.type !== "iframe") {
 
-            openFullViewer(
-              post,
-              index
-            );
+          element.addEventListener(
+            "click",
+            () => {
 
-          }
-        );
+              openFullViewer(
+                post,
+                index
+              );
+
+            }
+          );
+
+        }
 
 
-        grid.appendChild(item);
+        grid.appendChild(box);
 
       }
     );
 
 
-    media.appendChild(grid);
+    container.appendChild(grid);
 
   }
 
 
   /* ========================================
-     LIKE PUBLICATION
+     LIKE
   ======================================== */
 
   function updatePostLike(
@@ -807,7 +1273,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
   /* ========================================
-     OUVRIR VIEWER
+     VIEWER
   ======================================== */
 
   function openFullViewer(
@@ -821,28 +1287,27 @@ document.addEventListener("DOMContentLoaded", () => {
     viewerTrack.innerHTML = "";
 
 
-    post.images.forEach(
-      (image, i) => {
+    post.media.forEach(item => {
 
-        const slide =
-          document.createElement("div");
+      const slide =
+        document.createElement("div");
 
-        slide.className =
-          "viewer-slide";
-
-
-        const img =
-          document.createElement("img");
-
-        img.src = image.url;
-        img.alt = `Photo ${i + 1}`;
+      slide.className =
+        "viewer-slide";
 
 
-        slide.appendChild(img);
-        viewerTrack.appendChild(slide);
+      const element =
+        createMediaElement(
+          item,
+          true
+        );
 
-      }
-    );
+
+      slide.appendChild(element);
+
+      viewerTrack.appendChild(slide);
+
+    });
 
 
     viewer.classList.add("open");
@@ -869,10 +1334,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
-  /* ========================================
-     FERMER VIEWER
-  ======================================== */
-
   closeViewer.addEventListener(
     "click",
     () => {
@@ -881,22 +1342,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
       document.body.style.overflow = "";
 
+      viewerTrack.innerHTML = "";
+
       activePost = null;
 
     }
   );
 
 
-  /* ========================================
-     VIEWER GAUCHE
-  ======================================== */
-
   viewerPrev.addEventListener(
     "click",
     () => {
 
       if (!activePost) return;
-
       if (viewerIndex <= 0) return;
 
       viewerIndex--;
@@ -907,10 +1365,6 @@ document.addEventListener("DOMContentLoaded", () => {
   );
 
 
-  /* ========================================
-     VIEWER DROITE
-  ======================================== */
-
   viewerNext.addEventListener(
     "click",
     () => {
@@ -919,10 +1373,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (
         viewerIndex >=
-        activePost.images.length - 1
-      ) {
-        return;
-      }
+        activePost.media.length - 1
+      ) return;
 
       viewerIndex++;
 
@@ -947,30 +1399,23 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
-  /* ========================================
-     BALAYAGE VIEWER
-  ======================================== */
+  let viewerTimer;
 
-  let viewerScrollTimer;
 
   viewerTrack.addEventListener(
     "scroll",
     () => {
 
-      clearTimeout(
-        viewerScrollTimer
-      );
+      clearTimeout(viewerTimer);
 
-      viewerScrollTimer =
+      viewerTimer =
         setTimeout(
           () => {
 
             if (
               !activePost ||
               !viewerTrack.clientWidth
-            ) {
-              return;
-            }
+            ) return;
 
 
             viewerIndex =
@@ -985,7 +1430,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 0,
                 Math.min(
                   viewerIndex,
-                  activePost.images.length - 1
+                  activePost.media.length - 1
                 )
               );
 
@@ -1000,16 +1445,12 @@ document.addEventListener("DOMContentLoaded", () => {
   );
 
 
-  /* ========================================
-     MISE À JOUR VIEWER
-  ======================================== */
-
   function updateViewer() {
 
     if (!activePost) return;
 
     const total =
-      activePost.images.length;
+      activePost.media.length;
 
 
     viewerCounter.textContent =
@@ -1033,7 +1474,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     viewerCounter.style.display = "";
-
     viewerPrev.style.display = "";
     viewerNext.style.display = "";
 
@@ -1110,22 +1550,28 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
   /* ========================================
-     NETTOYAGE
+     NETTOYER MÉDIAS EN ATTENTE
   ======================================== */
 
-  function clearPendingImages() {
+  function clearPendingMedia() {
 
-    pendingImages.forEach(
-      image => {
+    pendingMedia.forEach(item => {
+
+      if (
+        item.local &&
+        item.url
+      ) {
 
         URL.revokeObjectURL(
-          image.url
+          item.url
         );
 
       }
-    );
 
-    pendingImages = [];
+    });
+
+
+    pendingMedia = [];
 
   }
 
