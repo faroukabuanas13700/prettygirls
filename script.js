@@ -8,7 +8,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const publishChoice = document.getElementById("publishChoice");
   const selectedCount = document.getElementById("selectedCount");
-
   const chooseCarousel = document.getElementById("chooseCarousel");
   const chooseGrid = document.getElementById("chooseGrid");
   const cancelPublish = document.getElementById("cancelPublish");
@@ -16,26 +15,22 @@ document.addEventListener("DOMContentLoaded", () => {
   const viewer = document.getElementById("viewer");
   const viewerTrack = document.getElementById("viewerTrack");
   const viewerCounter = document.getElementById("viewerCounter");
-
   const viewerPrev = document.getElementById("viewerPrev");
   const viewerNext = document.getElementById("viewerNext");
-
   const closeViewer = document.getElementById("closeViewer");
-
   const viewerLike = document.getElementById("viewerLike");
   const viewerLikeCount = document.getElementById("viewerLikeCount");
 
   let pendingImages = [];
-
   let posts = [];
 
   let activePost = null;
   let viewerIndex = 0;
 
 
-  /* =========================
+  /* ========================================
      ICÔNES
-  ========================= */
+  ======================================== */
 
   const heartIcon = `
     <svg viewBox="0 0 24 24">
@@ -62,22 +57,19 @@ document.addEventListener("DOMContentLoaded", () => {
   `;
 
 
-  /* =========================
+  /* ========================================
      BOUTON +
-  ========================= */
+  ======================================== */
 
   createPost.addEventListener("click", () => {
-
     imagePicker.value = "";
-
     imagePicker.click();
-
   });
 
 
-  /* =========================
-     CHOIX DES PHOTOS
-  ========================= */
+  /* ========================================
+     SÉLECTION DES PHOTOS
+  ======================================== */
 
   imagePicker.addEventListener("change", event => {
 
@@ -88,7 +80,7 @@ document.addEventListener("DOMContentLoaded", () => {
     clearPendingImages();
 
     pendingImages = files.map(file => ({
-      file,
+      file: file,
       url: URL.createObjectURL(file)
     }));
 
@@ -98,20 +90,18 @@ document.addEventListener("DOMContentLoaded", () => {
         : `${pendingImages.length} photos sélectionnées`;
 
     publishChoice.classList.add("open");
-
     document.body.style.overflow = "hidden";
 
   });
 
 
-  /* =========================
+  /* ========================================
      ANNULER
-  ========================= */
+  ======================================== */
 
   cancelPublish.addEventListener("click", () => {
 
     publishChoice.classList.remove("open");
-
     document.body.style.overflow = "";
 
     clearPendingImages();
@@ -119,50 +109,42 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
 
-  /* =========================
-     CRÉER CARROUSEL
-  ========================= */
+  /* ========================================
+     CARROUSEL / GRILLE
+  ======================================== */
 
   chooseCarousel.addEventListener("click", () => {
-
     createNewPost("carousel");
-
   });
-
-
-  /* =========================
-     CRÉER GRILLE
-  ========================= */
 
   chooseGrid.addEventListener("click", () => {
-
     createNewPost("grid");
-
   });
 
 
-  /* =========================
-     NOUVELLE PUBLICATION
-  ========================= */
+  /* ========================================
+     CRÉER UNE NOUVELLE PUBLICATION
+  ======================================== */
 
   function createNewPost(type) {
 
     if (!pendingImages.length) return;
 
     const post = {
+      id:
+        Date.now().toString() +
+        Math.random().toString(16).slice(2),
 
-      id: Date.now(),
+      type: type,
 
-      type,
-
-      images: pendingImages,
+      images: pendingImages.map(image => ({
+        file: image.file,
+        url: image.url
+      })),
 
       liked: false,
-
       likes: 0,
-
       currentIndex: 0
-
     };
 
     pendingImages = [];
@@ -170,7 +152,6 @@ document.addEventListener("DOMContentLoaded", () => {
     posts.unshift(post);
 
     publishChoice.classList.remove("open");
-
     document.body.style.overflow = "";
 
     renderFeed();
@@ -178,27 +159,41 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
-  /* =========================
+  /* ========================================
      AFFICHER LE FEED
-  ========================= */
+  ======================================== */
 
   function renderFeed() {
 
-    feed.innerHTML = "";
+    /*
+      IMPORTANT :
+      on supprime seulement les anciennes publications.
+      On ne détruit plus emptyFeed.
+    */
+
+    const oldPosts =
+      feed.querySelectorAll(".post");
+
+    oldPosts.forEach(postElement => {
+      postElement.remove();
+    });
+
 
     if (!posts.length) {
 
-      feed.appendChild(emptyFeed);
-
       emptyFeed.classList.remove("hidden");
-
       return;
 
     }
 
+
+    emptyFeed.classList.add("hidden");
+
+
     posts.forEach(post => {
 
-      const article = createPostElement(post);
+      const article =
+        createPostElement(post);
 
       feed.appendChild(article);
 
@@ -207,22 +202,23 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
-  /* =========================
+  /* ========================================
      CRÉER UNE PUBLICATION
-  ========================= */
+  ======================================== */
 
   function createPostElement(post) {
 
-    const article = document.createElement("article");
+    const article =
+      document.createElement("article");
 
     article.className = "post";
-
     article.dataset.postId = post.id;
 
 
-    /* EN-TÊTE */
+    /* ---------- EN-TÊTE ---------- */
 
-    const header = document.createElement("div");
+    const header =
+      document.createElement("div");
 
     header.className = "post-header";
 
@@ -233,7 +229,10 @@ document.addEventListener("DOMContentLoaded", () => {
         <strong>prettygirls</strong>
       </div>
 
-      <button class="more-btn" type="button">
+      <button
+        class="more-btn"
+        type="button"
+      >
         •••
       </button>
     `;
@@ -241,11 +240,13 @@ document.addEventListener("DOMContentLoaded", () => {
     article.appendChild(header);
 
 
-    /* MÉDIA */
+    /* ---------- MÉDIA ---------- */
 
-    const media = document.createElement("div");
+    const media =
+      document.createElement("div");
 
     media.className = "post-media";
+
 
     if (post.type === "carousel") {
 
@@ -257,12 +258,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     }
 
+
     article.appendChild(media);
 
 
-    /* ACTIONS */
+    /* ---------- ACTIONS ---------- */
 
-    const actions = document.createElement("div");
+    const actions =
+      document.createElement("div");
 
     actions.className = "post-actions";
 
@@ -270,23 +273,34 @@ document.addEventListener("DOMContentLoaded", () => {
       <div class="left-actions">
 
         <button
-          class="action-btn like-btn ${post.liked ? "liked" : ""}"
+          class="action-btn like-btn ${
+            post.liked ? "liked" : ""
+          }"
           type="button"
         >
           ${heartIcon}
         </button>
 
-        <button class="action-btn" type="button">
+        <button
+          class="action-btn"
+          type="button"
+        >
           ${commentIcon}
         </button>
 
-        <button class="action-btn" type="button">
+        <button
+          class="action-btn"
+          type="button"
+        >
           ${shareIcon}
         </button>
 
       </div>
 
-      <button class="action-btn" type="button">
+      <button
+        class="action-btn"
+        type="button"
+      >
         ${bookmarkIcon}
       </button>
     `;
@@ -295,22 +309,27 @@ document.addEventListener("DOMContentLoaded", () => {
     const likeButton =
       actions.querySelector(".like-btn");
 
-    likeButton.addEventListener("click", () => {
 
-      post.liked = !post.liked;
+    likeButton.addEventListener(
+      "click",
+      () => {
 
-      post.likes = post.liked ? 1 : 0;
+        post.liked = !post.liked;
+        post.likes = post.liked ? 1 : 0;
 
-      updatePostLike(article, post);
+        updatePostLike(article, post);
 
-    });
+      }
+    );
+
 
     article.appendChild(actions);
 
 
-    /* COMPTEUR */
+    /* ---------- NOMBRE DE LIKES ---------- */
 
-    const likes = document.createElement("div");
+    const likes =
+      document.createElement("div");
 
     likes.className = "likes";
 
@@ -323,9 +342,10 @@ document.addEventListener("DOMContentLoaded", () => {
     article.appendChild(likes);
 
 
-    /* LÉGENDE */
+    /* ---------- LÉGENDE ---------- */
 
-    const caption = document.createElement("div");
+    const caption =
+      document.createElement("div");
 
     caption.className = "caption";
 
@@ -342,9 +362,9 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
-  /* =========================
-     CARROUSEL
-  ========================= */
+  /* ========================================
+     CRÉER LE CARROUSEL
+  ======================================== */
 
   function createCarousel(post, media) {
 
@@ -372,12 +392,10 @@ document.addEventListener("DOMContentLoaded", () => {
         document.createElement("img");
 
       img.src = image.url;
-
       img.alt = `Photo ${index + 1}`;
 
 
       slide.appendChild(img);
-
       track.appendChild(slide);
 
     });
@@ -390,11 +408,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (post.images.length === 1) {
 
-      track.addEventListener("click", () => {
+      track.addEventListener(
+        "click",
+        () => {
 
-        openViewer(post, 0);
+          openFullViewer(post, 0);
 
-      });
+        }
+      );
 
       media.appendChild(carousel);
 
@@ -408,10 +429,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const counter =
       document.createElement("div");
 
-    counter.className = "carousel-counter";
+    counter.className =
+      "carousel-counter";
 
-    counter.textContent =
-      `1/${post.images.length}`;
 
     carousel.appendChild(counter);
 
@@ -424,25 +444,27 @@ document.addEventListener("DOMContentLoaded", () => {
     dots.className = "carousel-dots";
 
 
-    post.images.forEach((image, index) => {
+    post.images.forEach(
+      (image, index) => {
 
-      const dot =
-        document.createElement("span");
+        const dot =
+          document.createElement("span");
 
-      dot.className =
-        index === 0
-          ? "carousel-dot active"
-          : "carousel-dot";
+        dot.className =
+          index === post.currentIndex
+            ? "carousel-dot active"
+            : "carousel-dot";
 
-      dots.appendChild(dot);
+        dots.appendChild(dot);
 
-    });
+      }
+    );
 
 
     carousel.appendChild(dots);
 
 
-    /* FLÈCHES */
+    /* FLÈCHE GAUCHE */
 
     const prev =
       document.createElement("button");
@@ -451,9 +473,10 @@ document.addEventListener("DOMContentLoaded", () => {
       "carousel-arrow carousel-prev";
 
     prev.type = "button";
-
     prev.textContent = "‹";
 
+
+    /* FLÈCHE DROITE */
 
     const next =
       document.createElement("button");
@@ -462,7 +485,6 @@ document.addEventListener("DOMContentLoaded", () => {
       "carousel-arrow carousel-next";
 
     next.type = "button";
-
     next.textContent = "›";
 
 
@@ -475,17 +497,23 @@ document.addEventListener("DOMContentLoaded", () => {
       counter.textContent =
         `${post.currentIndex + 1}/${post.images.length}`;
 
+
       const allDots =
-        dots.querySelectorAll(".carousel-dot");
-
-      allDots.forEach((dot, index) => {
-
-        dot.classList.toggle(
-          "active",
-          index === post.currentIndex
+        dots.querySelectorAll(
+          ".carousel-dot"
         );
 
-      });
+
+      allDots.forEach(
+        (dot, index) => {
+
+          dot.classList.toggle(
+            "active",
+            index === post.currentIndex
+          );
+
+        }
+      );
 
 
       prev.style.visibility =
@@ -503,99 +531,122 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 
-    prev.addEventListener("click", event => {
+    /* FLÈCHE GAUCHE */
 
-      event.stopPropagation();
+    prev.addEventListener(
+      "click",
+      event => {
 
-      if (post.currentIndex <= 0) return;
+        event.stopPropagation();
 
-      post.currentIndex--;
+        if (post.currentIndex <= 0) {
+          return;
+        }
 
-      track.scrollTo({
+        post.currentIndex--;
 
-        left:
-          track.clientWidth *
-          post.currentIndex,
+        track.scrollTo({
+          left:
+            track.clientWidth *
+            post.currentIndex,
 
-        behavior: "smooth"
-
-      });
-
-      updateCarousel();
-
-    });
-
-
-    next.addEventListener("click", event => {
-
-      event.stopPropagation();
-
-      if (
-        post.currentIndex >=
-        post.images.length - 1
-      ) return;
-
-      post.currentIndex++;
-
-      track.scrollTo({
-
-        left:
-          track.clientWidth *
-          post.currentIndex,
-
-        behavior: "smooth"
-
-      });
-
-      updateCarousel();
-
-    });
-
-
-    let scrollTimer;
-
-    track.addEventListener("scroll", () => {
-
-      clearTimeout(scrollTimer);
-
-      scrollTimer = setTimeout(() => {
-
-        if (!track.clientWidth) return;
-
-        post.currentIndex =
-          Math.round(
-            track.scrollLeft /
-            track.clientWidth
-          );
-
-        post.currentIndex =
-          Math.max(
-            0,
-            Math.min(
-              post.currentIndex,
-              post.images.length - 1
-            )
-          );
+          behavior: "smooth"
+        });
 
         updateCarousel();
 
-      }, 70);
+      }
+    );
 
-    });
+
+    /* FLÈCHE DROITE */
+
+    next.addEventListener(
+      "click",
+      event => {
+
+        event.stopPropagation();
+
+        if (
+          post.currentIndex >=
+          post.images.length - 1
+        ) {
+          return;
+        }
+
+        post.currentIndex++;
+
+        track.scrollTo({
+          left:
+            track.clientWidth *
+            post.currentIndex,
+
+          behavior: "smooth"
+        });
+
+        updateCarousel();
+
+      }
+    );
 
 
-    track.addEventListener("click", event => {
+    /* BALAYAGE */
 
-      if (
-        event.target.closest(".carousel-arrow")
-      ) return;
+    let scrollTimer;
 
-      openViewer(
-        post,
-        post.currentIndex
-      );
+    track.addEventListener(
+      "scroll",
+      () => {
 
-    });
+        clearTimeout(scrollTimer);
+
+        scrollTimer = setTimeout(
+          () => {
+
+            if (!track.clientWidth) {
+              return;
+            }
+
+            post.currentIndex =
+              Math.round(
+                track.scrollLeft /
+                track.clientWidth
+              );
+
+
+            post.currentIndex =
+              Math.max(
+                0,
+                Math.min(
+                  post.currentIndex,
+                  post.images.length - 1
+                )
+              );
+
+
+            updateCarousel();
+
+          },
+          80
+        );
+
+      }
+    );
+
+
+    /* OUVRIR EN GRAND */
+
+    track.addEventListener(
+      "click",
+      () => {
+
+        openFullViewer(
+          post,
+          post.currentIndex
+        );
+
+      }
+    );
 
 
     updateCarousel();
@@ -605,16 +656,17 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
-  /* =========================
-     GRILLE
-  ========================= */
+  /* ========================================
+     CRÉER LA GRILLE
+  ======================================== */
 
   function createGrid(post, media) {
 
     const grid =
       document.createElement("div");
 
-    const total = post.images.length;
+    const total =
+      post.images.length;
 
 
     if (total === 1) {
@@ -622,30 +674,22 @@ document.addEventListener("DOMContentLoaded", () => {
       grid.className =
         "post-grid grid-1";
 
-    }
-
-    else if (total === 2) {
+    } else if (total === 2) {
 
       grid.className =
         "post-grid grid-2";
 
-    }
-
-    else if (total === 3) {
+    } else if (total === 3) {
 
       grid.className =
         "post-grid grid-3";
 
-    }
-
-    else if (total === 4) {
+    } else if (total === 4) {
 
       grid.className =
         "post-grid grid-4";
 
-    }
-
-    else {
+    } else {
 
       grid.className =
         "post-grid grid-many";
@@ -653,59 +697,66 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 
-    const visible =
+    const visibleImages =
       total > 4
         ? post.images.slice(0, 4)
         : post.images;
 
 
-    visible.forEach((image, index) => {
+    visibleImages.forEach(
+      (image, index) => {
 
-      const item =
-        document.createElement("div");
-
-      item.className = "grid-item";
-
-
-      const img =
-        document.createElement("img");
-
-      img.src = image.url;
-
-      img.alt = `Photo ${index + 1}`;
-
-
-      item.appendChild(img);
-
-
-      if (
-        total > 4 &&
-        index === 3
-      ) {
-
-        const more =
+        const item =
           document.createElement("div");
 
-        more.className = "grid-more";
+        item.className = "grid-item";
 
-        more.textContent =
-          `+${total - 4}`;
 
-        item.appendChild(more);
+        const img =
+          document.createElement("img");
+
+        img.src = image.url;
+        img.alt = `Photo ${index + 1}`;
+
+
+        item.appendChild(img);
+
+
+        if (
+          total > 4 &&
+          index === 3
+        ) {
+
+          const more =
+            document.createElement("div");
+
+          more.className = "grid-more";
+
+          more.textContent =
+            `+${total - 4}`;
+
+          item.appendChild(more);
+
+        }
+
+
+        item.addEventListener(
+          "click",
+          () => {
+
+            openFullViewer(
+              post,
+              index
+            );
+
+          }
+        );
+
+
+        grid.appendChild(item);
 
       }
-
-
-      item.addEventListener("click", () => {
-
-        openViewer(post, index);
-
-      });
-
-
-      grid.appendChild(item);
-
-    });
+    );
 
 
     media.appendChild(grid);
@@ -713,14 +764,19 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
-  /* =========================
-     LIKE D'UNE PUBLICATION
-  ========================= */
+  /* ========================================
+     LIKE PUBLICATION
+  ======================================== */
 
-  function updatePostLike(article, post) {
+  function updatePostLike(
+    article,
+    post
+  ) {
 
     const button =
-      article.querySelector(".like-btn");
+      article.querySelector(
+        ".like-btn"
+      );
 
     const counter =
       article.querySelector(
@@ -750,56 +806,62 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
-  /* =========================
+  /* ========================================
      OUVRIR VIEWER
-  ========================= */
+  ======================================== */
 
-  function openViewer(post, index) {
+  function openFullViewer(
+    post,
+    index
+  ) {
 
     activePost = post;
-
     viewerIndex = index;
 
     viewerTrack.innerHTML = "";
 
 
-    post.images.forEach((image, i) => {
+    post.images.forEach(
+      (image, i) => {
 
-      const slide =
-        document.createElement("div");
+        const slide =
+          document.createElement("div");
 
-      slide.className = "viewer-slide";
-
-
-      const img =
-        document.createElement("img");
-
-      img.src = image.url;
-
-      img.alt = `Photo ${i + 1}`;
+        slide.className =
+          "viewer-slide";
 
 
-      slide.appendChild(img);
+        const img =
+          document.createElement("img");
 
-      viewerTrack.appendChild(slide);
+        img.src = image.url;
+        img.alt = `Photo ${i + 1}`;
 
-    });
+
+        slide.appendChild(img);
+        viewerTrack.appendChild(slide);
+
+      }
+    );
 
 
     viewer.classList.add("open");
 
-    document.body.style.overflow = "hidden";
+    document.body.style.overflow =
+      "hidden";
 
 
-    requestAnimationFrame(() => {
+    requestAnimationFrame(
+      () => {
 
-      viewerTrack.scrollLeft =
-        viewerTrack.clientWidth *
-        viewerIndex;
+        viewerTrack.scrollLeft =
+          viewerTrack.clientWidth *
+          viewerIndex;
 
-      updateViewer();
+        updateViewer();
 
-    });
+      }
+    );
 
 
     updateViewerLike();
@@ -807,68 +869,77 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
-  /* =========================
+  /* ========================================
      FERMER VIEWER
-  ========================= */
+  ======================================== */
 
-  closeViewer.addEventListener("click", () => {
+  closeViewer.addEventListener(
+    "click",
+    () => {
 
-    viewer.classList.remove("open");
+      viewer.classList.remove("open");
 
-    document.body.style.overflow = "";
+      document.body.style.overflow = "";
 
-    activePost = null;
+      activePost = null;
 
-  });
-
-
-  /* =========================
-     VIEWER PRÉCÉDENT
-  ========================= */
-
-  viewerPrev.addEventListener("click", () => {
-
-    if (!activePost) return;
-
-    if (viewerIndex <= 0) return;
-
-    viewerIndex--;
-
-    scrollViewer();
-
-  });
+    }
+  );
 
 
-  /* =========================
-     VIEWER SUIVANT
-  ========================= */
+  /* ========================================
+     VIEWER GAUCHE
+  ======================================== */
 
-  viewerNext.addEventListener("click", () => {
+  viewerPrev.addEventListener(
+    "click",
+    () => {
 
-    if (!activePost) return;
+      if (!activePost) return;
 
-    if (
-      viewerIndex >=
-      activePost.images.length - 1
-    ) return;
+      if (viewerIndex <= 0) return;
 
-    viewerIndex++;
+      viewerIndex--;
 
-    scrollViewer();
+      scrollViewer();
 
-  });
+    }
+  );
+
+
+  /* ========================================
+     VIEWER DROITE
+  ======================================== */
+
+  viewerNext.addEventListener(
+    "click",
+    () => {
+
+      if (!activePost) return;
+
+      if (
+        viewerIndex >=
+        activePost.images.length - 1
+      ) {
+        return;
+      }
+
+      viewerIndex++;
+
+      scrollViewer();
+
+    }
+  );
 
 
   function scrollViewer() {
 
     viewerTrack.scrollTo({
-
       left:
         viewerTrack.clientWidth *
         viewerIndex,
 
       behavior: "smooth"
-
     });
 
     updateViewer();
@@ -876,51 +947,62 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
-  /* =========================
+  /* ========================================
      BALAYAGE VIEWER
-  ========================= */
+  ======================================== */
 
   let viewerScrollTimer;
 
-  viewerTrack.addEventListener("scroll", () => {
+  viewerTrack.addEventListener(
+    "scroll",
+    () => {
 
-    clearTimeout(viewerScrollTimer);
+      clearTimeout(
+        viewerScrollTimer
+      );
 
-    viewerScrollTimer = setTimeout(() => {
+      viewerScrollTimer =
+        setTimeout(
+          () => {
 
-      if (
-        !activePost ||
-        !viewerTrack.clientWidth
-      ) return;
+            if (
+              !activePost ||
+              !viewerTrack.clientWidth
+            ) {
+              return;
+            }
 
 
-      viewerIndex =
-        Math.round(
-          viewerTrack.scrollLeft /
-          viewerTrack.clientWidth
+            viewerIndex =
+              Math.round(
+                viewerTrack.scrollLeft /
+                viewerTrack.clientWidth
+              );
+
+
+            viewerIndex =
+              Math.max(
+                0,
+                Math.min(
+                  viewerIndex,
+                  activePost.images.length - 1
+                )
+              );
+
+
+            updateViewer();
+
+          },
+          80
         );
 
-
-      viewerIndex =
-        Math.max(
-          0,
-          Math.min(
-            viewerIndex,
-            activePost.images.length - 1
-          )
-        );
+    }
+  );
 
 
-      updateViewer();
-
-    }, 70);
-
-  });
-
-
-  /* =========================
+  /* ========================================
      MISE À JOUR VIEWER
-  ========================= */
+  ======================================== */
 
   function updateViewer() {
 
@@ -936,11 +1018,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (total <= 1) {
 
-      viewerCounter.style.display = "none";
+      viewerCounter.style.display =
+        "none";
 
-      viewerPrev.style.display = "none";
+      viewerPrev.style.display =
+        "none";
 
-      viewerNext.style.display = "none";
+      viewerNext.style.display =
+        "none";
 
       return;
 
@@ -950,7 +1035,6 @@ document.addEventListener("DOMContentLoaded", () => {
     viewerCounter.style.display = "";
 
     viewerPrev.style.display = "";
-
     viewerNext.style.display = "";
 
 
@@ -968,50 +1052,56 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
-  /* =========================
-     LIKE DANS VIEWER
-  ========================= */
+  /* ========================================
+     LIKE VIEWER
+  ======================================== */
 
-  viewerLike.addEventListener("click", () => {
+  viewerLike.addEventListener(
+    "click",
+    () => {
 
-    if (!activePost) return;
-
-    activePost.liked =
-      !activePost.liked;
-
-    activePost.likes =
-      activePost.liked ? 1 : 0;
+      if (!activePost) return;
 
 
-    updateViewerLike();
+      activePost.liked =
+        !activePost.liked;
+
+      activePost.likes =
+        activePost.liked ? 1 : 0;
 
 
-    const article =
-      feed.querySelector(
-        `[data-post-id="${activePost.id}"]`
-      );
+      updateViewerLike();
 
 
-    if (article) {
+      const article =
+        feed.querySelector(
+          `[data-post-id="${activePost.id}"]`
+        );
 
-      updatePostLike(
-        article,
-        activePost
-      );
+
+      if (article) {
+
+        updatePostLike(
+          article,
+          activePost
+        );
+
+      }
 
     }
-
-  });
+  );
 
 
   function updateViewerLike() {
 
     if (!activePost) return;
 
+
     viewerLike.classList.toggle(
       "liked",
       activePost.liked
     );
+
 
     viewerLikeCount.textContent =
       activePost.likes;
@@ -1019,26 +1109,30 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
-  /* =========================
+  /* ========================================
      NETTOYAGE
-  ========================= */
+  ======================================== */
 
   function clearPendingImages() {
 
-    pendingImages.forEach(image => {
+    pendingImages.forEach(
+      image => {
 
-      URL.revokeObjectURL(image.url);
+        URL.revokeObjectURL(
+          image.url
+        );
 
-    });
+      }
+    );
 
     pendingImages = [];
 
   }
 
 
-  /* =========================
+  /* ========================================
      DÉMARRAGE
-  ========================= */
+  ======================================== */
 
   renderFeed();
 
