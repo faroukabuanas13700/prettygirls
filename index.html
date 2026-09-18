@@ -26,7 +26,6 @@
         <svg viewBox="0 0 24 24">
           <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/>
         </svg>
-
         <span class="badge">3</span>
       </button>
 
@@ -66,20 +65,47 @@
       </div>
 
 
-      <!-- PHOTO -->
+      <!-- MÉDIAS DE LA PUBLICATION -->
       <div class="media-container" id="openViewer">
 
         <div class="photo-placeholder" id="feedPlaceholder">
-
           <span>PrettyGirls</span>
 
           <small>
-            Appuie sur + pour choisir une photo
+            Appuie sur + pour choisir tes photos
           </small>
+        </div>
+
+        <!-- CARROUSEL -->
+        <div class="carousel" id="carousel">
+
+          <div class="carousel-track" id="carouselTrack"></div>
+
+          <button
+            class="carousel-arrow carousel-prev"
+            id="carouselPrev"
+            type="button"
+          >
+            ‹
+          </button>
+
+          <button
+            class="carousel-arrow carousel-next"
+            id="carouselNext"
+            type="button"
+          >
+            ›
+          </button>
+
+          <div class="carousel-counter" id="carouselCounter"></div>
+
+          <div class="carousel-dots" id="carouselDots"></div>
 
         </div>
 
-        <img id="feedImage" alt="Publication">
+
+        <!-- GRILLE -->
+        <div class="media-grid" id="mediaGrid"></div>
 
       </div>
 
@@ -169,35 +195,110 @@
   </nav>
 
 
-  <!-- CHOIX PHOTO -->
+  <!-- SÉLECTION DE PLUSIEURS PHOTOS -->
   <input
     type="file"
     id="imagePicker"
     accept="image/*"
+    multiple
     hidden
   >
 
 
-  <!-- AFFICHAGE PLEIN ÉCRAN -->
+  <!-- CHOIX DU TYPE DE PUBLICATION -->
+  <div class="publish-choice" id="publishChoice">
+
+    <div class="publish-choice-box">
+
+      <h2>Créer une publication</h2>
+
+      <p id="selectedCount">
+        Photos sélectionnées
+      </p>
+
+      <button
+        class="publish-type-btn"
+        id="chooseCarousel"
+        type="button"
+      >
+        <strong>Carrousel</strong>
+        <span>Faire défiler les photos une par une</span>
+      </button>
+
+      <button
+        class="publish-type-btn"
+        id="chooseGrid"
+        type="button"
+      >
+        <strong>Grille</strong>
+        <span>Afficher plusieurs photos ensemble</span>
+      </button>
+
+      <button
+        class="cancel-publish"
+        id="cancelPublish"
+        type="button"
+      >
+        Annuler
+      </button>
+
+    </div>
+
+  </div>
+
+
+  <!-- VIEWER PLEIN ÉCRAN -->
   <div class="viewer" id="viewer">
 
     <div class="viewer-header">
 
-      <button id="closeViewer">‹</button>
+      <button id="closeViewer" type="button">‹</button>
 
       <strong>Publication</strong>
 
     </div>
 
-    <img id="viewerImage" alt="Publication">
+
+    <!-- CARROUSEL PLEIN ÉCRAN -->
+    <div class="viewer-media" id="viewerMedia">
+
+      <div
+        class="viewer-carousel-track"
+        id="viewerCarouselTrack"
+      ></div>
+
+      <button
+        class="viewer-arrow viewer-prev"
+        id="viewerPrev"
+        type="button"
+      >
+        ‹
+      </button>
+
+      <button
+        class="viewer-arrow viewer-next"
+        id="viewerNext"
+        type="button"
+      >
+        ›
+      </button>
+
+      <div
+        class="viewer-counter"
+        id="viewerCounter"
+      ></div>
+
+    </div>
 
 
+    <!-- ACTIONS VIEWER -->
     <div class="viewer-actions">
 
       <button class="viewer-action like-btn" id="viewerLike">
         <svg viewBox="0 0 24 24">
           <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/>
         </svg>
+
         <span id="viewerLikeCount">0</span>
       </button>
 
@@ -222,11 +323,15 @@
     </div>
 
 
+    <!-- INFORMATIONS VIEWER -->
     <div class="viewer-info">
 
       <div class="viewer-user">
+
         <div class="avatar">P</div>
+
         <strong>prettygirls</strong>
+
       </div>
 
       <div class="viewer-caption">
