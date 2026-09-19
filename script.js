@@ -1,153 +1,149 @@
-PRETTYGIRLS — script.js — REMPLACEMENT DU BLOC FIREBASE AUTHENTICATION
-
-Garde le firebaseConfig, firebase.initializeApp(), auth et db au début du fichier.
-Garde également tout le code actuel de l'application.
-Supprime uniquement l'ancien bloc "FIREBASE AUTHENTICATION" situé à la fin et remplace-le par :
+const firebaseConfig = {
+  apiKey: "AIzaSyBSDUYIIzNi-6WJz_QpEOE6KQKEQ9no3Y0",
+  authDomain: "prettygirls-8e2cf.firebaseapp.com",
+  projectId: "prettygirls-8e2cf",
+  storageBucket: "prettygirls-8e2cf.firebasestorage.app",
+  messagingSenderId: "54340647655",
+  appId: "1:54340647655:web:02a86d117d8073c21d0042",
+  measurementId: "G-25PE8MX3WD"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
 
 document.addEventListener("DOMContentLoaded", () => {
-  const app = document.getElementById("app");
-  const authScreen = document.getElementById("authScreen");
-  const authVideo = document.getElementById("authVideo");
-  const loginForm = document.getElementById("loginForm");
-  const signupForm = document.getElementById("signupForm");
-  const loginEmail = document.getElementById("loginEmail");
-  const loginPassword = document.getElementById("loginPassword");
-  const loginBtn = document.getElementById("loginBtn");
-  const loginMessage = document.getElementById("loginMessage");
-  const signupUsername = document.getElementById("signupUsername");
-  const signupEmail = document.getElementById("signupEmail");
-  const signupPassword = document.getElementById("signupPassword");
-  const signupPasswordConfirm = document.getElementById("signupPasswordConfirm");
-  const signupBtn = document.getElementById("signupBtn");
-  const signupMessage = document.getElementById("signupMessage");
-  const showSignupBtn = document.getElementById("showSignupBtn");
-  const showLoginBtn = document.getElementById("showLoginBtn");
-  const showLoginTextBtn = document.getElementById("showLoginTextBtn");
+  const $ = id => document.getElementById(id);
+  const app=$("app"), authScreen=$("authScreen"), authVideo=$("authVideo");
+  const loginForm=$("loginForm"), signupForm=$("signupForm");
+  const loginEmail=$("loginEmail"), loginPassword=$("loginPassword"), loginBtn=$("loginBtn"), loginMessage=$("loginMessage");
+  const signupUsername=$("signupUsername"), signupEmail=$("signupEmail"), signupPassword=$("signupPassword"), signupPasswordConfirm=$("signupPasswordConfirm"), signupBtn=$("signupBtn"), signupMessage=$("signupMessage");
 
-  function showLogin() {
-    signupForm.classList.add("hidden");
-    loginForm.classList.remove("hidden");
-    loginMessage.textContent = "";
-    signupMessage.textContent = "";
-    authScreen.scrollTo({top:0, behavior:"smooth"});
-  }
+  $("showSignupBtn").onclick=()=>{loginForm.classList.add("hidden");signupForm.classList.remove("hidden");};
+  $("showLoginBtn").onclick=$("showLoginTextBtn").onclick=()=>{signupForm.classList.add("hidden");loginForm.classList.remove("hidden");};
 
-  function showSignup() {
-    loginForm.classList.add("hidden");
-    signupForm.classList.remove("hidden");
-    loginMessage.textContent = "";
-    signupMessage.textContent = "";
-    authScreen.scrollTo({top:0, behavior:"smooth"});
-  }
-
-  showSignupBtn.addEventListener("click", showSignup);
-  showLoginBtn.addEventListener("click", showLogin);
-  showLoginTextBtn.addEventListener("click", showLogin);
-  loginPassword.addEventListener("keydown", e => { if (e.key === "Enter") loginBtn.click(); });
-
-  auth.onAuthStateChanged(async user => {
-    if (!user) {
-      app.classList.remove("authenticated");
-      authScreen.classList.remove("authenticated");
-      document.body.classList.add("auth-active");
-      showLogin();
-      if (authVideo) {
-        authVideo.muted = true;
-        const p = authVideo.play();
-        if (p) p.catch(() => {});
-      }
-      return;
-    }
-
-    authScreen.classList.add("authenticated");
-    app.classList.add("authenticated");
-    document.body.classList.remove("auth-active");
-    if (authVideo) authVideo.pause();
-
-    try {
-      const ref = db.collection("profiles").doc(user.uid);
-      const snap = await ref.get();
-      if (!snap.exists) {
-        await ref.set({
-          email: user.email || "",
-          username: "",
-          display_name: "",
-          bio: "",
-          created_at: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        return;
-      }
-      const profile = snap.data();
-      const username = profile.username || profile.display_name || "prettygirls";
-      const displayName = profile.display_name || profile.username || "PrettyGirls";
-      const bio = profile.bio || "Bienvenue sur PrettyGirls ❤️";
-      const top = document.getElementById("profileUsernameTop");
-      const name = document.getElementById("profileDisplayName");
-      const bioEl = document.getElementById("profileBio");
-      const avatar = document.getElementById("profileAvatarLarge");
-      const mini = document.querySelector(".mini-avatar");
-      if (top) top.textContent = username;
-      if (name) name.textContent = displayName;
-      if (bioEl) bioEl.textContent = bio;
-      const letter = (username || "P").charAt(0).toUpperCase();
-      if (avatar) avatar.textContent = letter;
-      if (mini) mini.textContent = letter;
-    } catch (e) { console.error("Erreur chargement profil :", e); }
-  });
-
-  signupBtn.addEventListener("click", async () => {
-    const username = signupUsername.value.trim();
-    const email = signupEmail.value.trim();
-    const password = signupPassword.value;
-    const confirmation = signupPasswordConfirm.value;
-    signupMessage.textContent = "";
-
-    if (username.length < 3) return signupMessage.textContent = "Le nom d'utilisateur doit contenir au moins 3 caractères.";
-    if (!/^[a-zA-Z0-9._]+$/.test(username)) return signupMessage.textContent = "Utilise seulement des lettres, chiffres, points ou _.";
-    if (!email) return signupMessage.textContent = "Entre ton adresse e-mail.";
-    if (password.length < 6) return signupMessage.textContent = "Le mot de passe doit contenir au moins 6 caractères.";
-    if (password !== confirmation) return signupMessage.textContent = "Les deux mots de passe ne correspondent pas.";
-
-    signupBtn.disabled = true;
-    signupBtn.textContent = "Création du compte...";
-    try {
-      const result = await auth.createUserWithEmailAndPassword(email, password);
-      await db.collection("profiles").doc(result.user.uid).set({
-        username, email, display_name: username,
-        bio: "Bienvenue sur PrettyGirls ❤️",
-        created_at: firebase.firestore.FieldValue.serverTimestamp()
-      });
-    } catch (e) {
-      signupMessage.textContent = authMessage(e);
-    } finally {
-      signupBtn.disabled = false;
-      signupBtn.textContent = "Créer mon compte";
-    }
-  });
-
-  loginBtn.addEventListener("click", async () => {
-    const email = loginEmail.value.trim();
-    const password = loginPassword.value;
-    loginMessage.textContent = "";
-    if (!email || !password) return loginMessage.textContent = "Entre ton e-mail et ton mot de passe.";
-    loginBtn.disabled = true;
-    loginBtn.textContent = "Connexion...";
-    try { await auth.signInWithEmailAndPassword(email, password); }
-    catch (e) { loginMessage.textContent = authMessage(e); }
-    finally { loginBtn.disabled = false; loginBtn.textContent = "Se connecter"; }
-  });
-
-  function authMessage(e) {
-    switch (e.code) {
-      case "auth/email-already-in-use": return "Cette adresse e-mail possède déjà un compte.";
-      case "auth/invalid-email": return "L'adresse e-mail n'est pas valide.";
-      case "auth/weak-password": return "Le mot de passe est trop faible.";
+  function msg(e){
+    switch(e.code){
+      case "auth/email-already-in-use":return"Cette adresse e-mail possède déjà un compte.";
+      case "auth/invalid-email":return"L'adresse e-mail n'est pas valide.";
+      case "auth/weak-password":return"Le mot de passe est trop faible.";
       case "auth/invalid-credential":
       case "auth/wrong-password":
-      case "auth/user-not-found": return "E-mail ou mot de passe incorrect.";
-      case "auth/too-many-requests": return "Trop de tentatives. Réessaie un peu plus tard.";
-      case "auth/network-request-failed": return "Vérifie ta connexion Internet.";
-      default: return e.message || "Une erreur est survenue.";
+      case "auth/user-not-found":return"E-mail ou mot de passe incorrect.";
+      case "auth/too-many-requests":return"Trop de tentatives. Réessaie plus tard.";
+      default:return e.message||"Une erreur est survenue.";
     }
   }
+
+  loginBtn.onclick=async()=>{
+    loginMessage.textContent="";
+    if(!loginEmail.value.trim()||!loginPassword.value){loginMessage.textContent="Entre ton e-mail et ton mot de passe.";return;}
+    loginBtn.disabled=true;loginBtn.textContent="Connexion...";
+    try{await auth.signInWithEmailAndPassword(loginEmail.value.trim(),loginPassword.value);}
+    catch(e){loginMessage.textContent=msg(e);}
+    finally{loginBtn.disabled=false;loginBtn.textContent="Se connecter";}
+  };
+
+  signupBtn.onclick=async()=>{
+    const username=signupUsername.value.trim(),email=signupEmail.value.trim(),password=signupPassword.value,confirm=signupPasswordConfirm.value;
+    signupMessage.textContent="";
+    if(username.length<3){signupMessage.textContent="Le nom d'utilisateur doit contenir au moins 3 caractères.";return;}
+    if(!/^[a-zA-Z0-9._]+$/.test(username)){signupMessage.textContent="Utilise seulement lettres, chiffres, points ou _.";return;}
+    if(!email){signupMessage.textContent="Entre ton adresse e-mail.";return;}
+    if(password.length<6){signupMessage.textContent="Le mot de passe doit contenir au moins 6 caractères.";return;}
+    if(password!==confirm){signupMessage.textContent="Les deux mots de passe ne correspondent pas.";return;}
+    signupBtn.disabled=true;signupBtn.textContent="Création...";
+    try{
+      const result=await auth.createUserWithEmailAndPassword(email,password);
+      await db.collection("profiles").doc(result.user.uid).set({
+        username,email,display_name:username,bio:"Bienvenue sur PrettyGirls ❤️",
+        created_at:firebase.firestore.FieldValue.serverTimestamp()
+      });
+    }catch(e){signupMessage.textContent=msg(e);}
+    finally{signupBtn.disabled=false;signupBtn.textContent="Créer mon compte";}
+  };
+
+  auth.onAuthStateChanged(async user=>{
+    if(!user){
+      app.classList.remove("authenticated");authScreen.classList.remove("authenticated");document.body.classList.add("auth-active");
+      if(authVideo){authVideo.muted=true;authVideo.play().catch(()=>{});}
+      return;
+    }
+    authScreen.classList.add("authenticated");app.classList.add("authenticated");document.body.classList.remove("auth-active");
+    if(authVideo)authVideo.pause();
+    try{
+      const snap=await db.collection("profiles").doc(user.uid).get();
+      if(snap.exists){
+        const p=snap.data(),u=p.username||p.display_name||"prettygirls",n=p.display_name||u,b=p.bio||"Bienvenue sur PrettyGirls ❤️";
+        if($("profileUsernameTop"))$("profileUsernameTop").textContent=u;
+        if($("profileDisplayName"))$("profileDisplayName").textContent=n;
+        if($("profileBio"))$("profileBio").textContent=b;
+        const letter=u.charAt(0).toUpperCase();
+        if($("profileAvatarLarge"))$("profileAvatarLarge").textContent=letter;
+        const mini=document.querySelector(".mini-avatar");if(mini)mini.textContent=letter;
+      }
+    }catch(e){console.error(e);}
+  });
+
+  /* Interface principale */
+  const feed=$("feed"),emptyFeed=$("emptyFeed"),createPost=$("createPost"),imagePicker=$("imagePicker");
+  const sourceChoice=$("sourceChoice"),chooseUpload=$("chooseUpload"),chooseExternal=$("chooseExternal"),cancelSource=$("cancelSource");
+  const externalModal=$("externalModal"),externalBack=$("externalBack"),externalInput=$("externalInput"),externalContinue=$("externalContinue"),externalError=$("externalError");
+  const publishChoice=$("publishChoice"),selectedCount=$("selectedCount"),chooseCarousel=$("chooseCarousel"),chooseGrid=$("chooseGrid"),cancelPublish=$("cancelPublish");
+  let pendingMedia=[],posts=[];
+
+  createPost.onclick=()=>sourceChoice.classList.add("open");
+  cancelSource.onclick=()=>sourceChoice.classList.remove("open");
+  chooseUpload.onclick=()=>{sourceChoice.classList.remove("open");imagePicker.value="";imagePicker.click();};
+  imagePicker.onchange=e=>{
+    pendingMedia=[...e.target.files].map(file=>({type:file.type.startsWith("video/")?"video":"image",url:URL.createObjectURL(file),local:true,file}));
+    if(pendingMedia.length){selectedCount.textContent=`${pendingMedia.length} média${pendingMedia.length>1?"s":""} sélectionné${pendingMedia.length>1?"s":""}`;publishChoice.classList.add("open");}
+  };
+  chooseExternal.onclick=()=>{sourceChoice.classList.remove("open");externalModal.classList.add("open");};
+  externalBack.onclick=()=>{externalModal.classList.remove("open");sourceChoice.classList.add("open");};
+  externalContinue.onclick=()=>{
+    const urls=(externalInput.value.match(/https?:\/\/[^\s<>"'\]]+/gi)||[]);
+    pendingMedia=urls.map(url=>({type:/\.(jpg|jpeg|png|gif|webp)(\?|$)/i.test(url)?"image":/\.(mp4|webm|mov)(\?|$)/i.test(url)?"video":"iframe",url,local:false}));
+    if(!pendingMedia.length){externalError.textContent="Aucun média valide détecté.";return;}
+    externalModal.classList.remove("open");selectedCount.textContent=`${pendingMedia.length} média(s) sélectionné(s)`;publishChoice.classList.add("open");
+  };
+  cancelPublish.onclick=()=>{publishChoice.classList.remove("open");pendingMedia=[];};
+
+  function publish(layout){
+    if(!pendingMedia.length)return;
+    posts.unshift({id:Date.now().toString(),layout,media:[...pendingMedia],liked:false,likes:0});
+    pendingMedia=[];publishChoice.classList.remove("open");render();
+  }
+  chooseCarousel.onclick=()=>publish("carousel");chooseGrid.onclick=()=>publish("grid");
+
+  function mediaEl(m){
+    const el=document.createElement(m.type==="image"?"img":m.type==="video"?"video":"iframe");el.src=m.url;
+    if(m.type==="video"){el.controls=true;el.playsInline=true;}if(m.type==="iframe")el.allowFullscreen=true;return el;
+  }
+  function render(){
+    feed.querySelectorAll(".post").forEach(x=>x.remove());
+    emptyFeed.classList.toggle("hidden",posts.length>0);
+    posts.forEach(p=>{
+      const a=document.createElement("article");a.className="post";
+      a.innerHTML=`<div class="post-header"><div class="avatar">P</div><div class="post-user"><strong>prettygirls</strong></div><button class="more-btn">•••</button></div>`;
+      const mc=document.createElement("div");mc.className="post-media";
+      const wrap=document.createElement("div");wrap.className=p.layout==="grid"?"post-grid grid-"+Math.min(p.media.length,4):"post-carousel-track";
+      p.media.forEach(m=>{const box=document.createElement("div");box.className=p.layout==="grid"?"grid-item":"post-slide";box.appendChild(mediaEl(m));wrap.appendChild(box);});
+      mc.appendChild(wrap);a.appendChild(mc);
+      const actions=document.createElement("div");actions.className="post-actions";actions.innerHTML=`<div class="left-actions"><button class="action-btn like-btn">♡</button><button class="action-btn">◯</button><button class="action-btn">↗</button></div><button class="action-btn">♡</button>`;
+      a.appendChild(actions);const likes=document.createElement("div");likes.className="likes";likes.innerHTML="<strong>0 J’aime</strong>";a.appendChild(likes);
+      const cap=document.createElement("div");cap.className="caption";cap.innerHTML="<strong>prettygirls</strong> Bienvenue sur PrettyGirls ❤️";a.appendChild(cap);feed.appendChild(a);
+    });
+    if($("profilePostCount"))$("profilePostCount").textContent=posts.length;
+  }
+
+  $("homeNav").onclick=()=>{$("profilePage").classList.remove("open");document.querySelectorAll(".home-ui").forEach(e=>e.style.display="");};
+  $("profileNav").onclick=()=>{document.querySelectorAll(".home-ui").forEach(e=>e.style.display="none");$("profilePage").classList.add("open");};
+  $("editProfileBtn").onclick=()=>{$("editDisplayName").value=$("profileDisplayName").textContent;$("editBio").value=$("profileBio").textContent;$("editProfileModal").classList.add("open");};
+  $("cancelEditProfile").onclick=()=>$("editProfileModal").classList.remove("open");
+  $("saveEditProfile").onclick=async()=>{
+    const name=$("editDisplayName").value.trim()||"PrettyGirls",bio=$("editBio").value.trim()||"Bienvenue sur PrettyGirls ❤️";
+    $("profileDisplayName").textContent=name;$("profileBio").textContent=bio;$("editProfileModal").classList.remove("open");
+    if(auth.currentUser)await db.collection("profiles").doc(auth.currentUser.uid).set({display_name:name,bio},{merge:true});
+  };
+  render();
 });
