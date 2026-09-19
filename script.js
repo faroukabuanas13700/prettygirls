@@ -1728,3 +1728,58 @@ document.addEventListener("DOMContentLoaded", () => {
   renderProfileGrid();
 
 });
+
+/* =========================================================
+   FIREBASE AUTHENTICATION
+========================================================= */
+
+const authScreen = document.getElementById("authScreen");
+const authEmail = document.getElementById("authEmail");
+const authPassword = document.getElementById("authPassword");
+const loginBtn = document.getElementById("loginBtn");
+const signupBtn = document.getElementById("signupBtn");
+const authMessage = document.getElementById("authMessage");
+
+auth.onAuthStateChanged((user) => {
+  if (user) {
+    authScreen.style.display = "none";
+    console.log("Utilisateur connecté :", user.uid);
+  } else {
+    authScreen.style.display = "flex";
+  }
+});
+
+signupBtn.addEventListener("click", async () => {
+  const email = authEmail.value.trim();
+  const password = authPassword.value;
+
+  authMessage.textContent = "";
+
+  try {
+    const result = await auth.createUserWithEmailAndPassword(email, password);
+
+    await db.collection("profiles").doc(result.user.uid).set({
+      email: email,
+      display_name: "",
+      bio: "",
+      created_at: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    authMessage.textContent = "Compte créé !";
+  } catch (error) {
+    authMessage.textContent = error.message;
+  }
+});
+
+loginBtn.addEventListener("click", async () => {
+  const email = authEmail.value.trim();
+  const password = authPassword.value;
+
+  authMessage.textContent = "";
+
+  try {
+    await auth.signInWithEmailAndPassword(email, password);
+  } catch (error) {
+    authMessage.textContent = error.message;
+  }
+});
