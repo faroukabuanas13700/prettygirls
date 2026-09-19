@@ -1,53 +1,213 @@
-PRETTYGIRLS — index.html — NOUVELLE INTERFACE AVEC intro.mp4
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#000000">
+  <title>PrettyGirls</title>
+  <link rel="stylesheet" href="style.css?v=20260919-fullscreen1">
+</head>
+<body>
 
-Dans le <head>, utilise :
-<link rel="stylesheet" href="style.css?v=20260919-authvideo1">
+<div id="app">
 
-Supprime entièrement l'ancien bloc authScreen et remplace-le par :
+  <header class="topbar home-ui">
+    <div class="logo"><span>Pretty</span><strong>Girls</strong></div>
+    <div class="top-actions">
+      <button class="icon-btn" type="button">
+        <svg viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
+        <span class="badge">3</span>
+      </button>
+      <button class="icon-btn" type="button">
+        <svg viewBox="0 0 24 24"><path d="M22 2L9.5 14.5M22 2l-8 20-4.5-7.5L2 10l20-8z"/></svg>
+      </button>
+    </div>
+  </header>
 
-<div id="authScreen" class="auth-screen">
-  <div class="auth-video-zone">
-    <video id="authVideo" class="auth-video" autoplay muted loop playsinline preload="auto">
-      <source src="intro.mp4" type="video/mp4">
-    </video>
-    <div class="auth-video-shade"></div>
-    <div class="auth-brand">
-      <div class="auth-logo"><span>Pretty</span><strong>Girls</strong></div>
-      <p>Partage • Découvre • Connecte-toi</p>
+  <div class="tabs home-ui">
+    <button class="tab active" type="button">Pour toi</button>
+    <button class="tab" type="button">Abonnements</button>
+  </div>
+
+  <main class="feed home-ui" id="feed">
+    <div class="empty-feed" id="emptyFeed">
+      <div class="empty-logo"><span>Pretty</span><strong>Girls</strong></div>
+      <p>Aucune publication pour le moment</p>
+      <small>Appuie sur + pour créer ta première publication</small>
+    </div>
+  </main>
+
+  <section class="profile-page" id="profilePage">
+    <header class="profile-topbar">
+      <strong id="profileUsernameTop">prettygirls</strong>
+      <div class="profile-top-actions">
+        <button type="button" aria-label="Créer">＋</button>
+        <button type="button" aria-label="Menu">☰</button>
+      </div>
+    </header>
+
+    <div class="profile-main">
+      <div class="profile-summary">
+        <div class="profile-avatar-large" id="profileAvatarLarge">P</div>
+        <div class="profile-stat"><strong id="profilePostCount">0</strong><span>Publications</span></div>
+        <div class="profile-stat"><strong>0</strong><span>Abonnés</span></div>
+        <div class="profile-stat"><strong>0</strong><span>Abonnements</span></div>
+      </div>
+
+      <div class="profile-name" id="profileDisplayName">PrettyGirls</div>
+      <div class="profile-bio" id="profileBio">Bienvenue sur PrettyGirls ❤️</div>
+
+      <div class="profile-buttons">
+        <button type="button" id="editProfileBtn">Modifier le profil</button>
+        <button type="button" id="shareProfileBtn">Partager le profil</button>
+      </div>
+    </div>
+
+    <div class="profile-tabs">
+      <button class="profile-tab active" data-profile-tab="posts" type="button" aria-label="Publications">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="1"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>
+      </button>
+      <button class="profile-tab" data-profile-tab="reels" type="button" aria-label="Reels">
+        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M8 4l4 5 4-5M10 12l6 3-6 3z"/></svg>
+      </button>
+      <button class="profile-tab" data-profile-tab="saved" type="button" aria-label="Enregistrés">
+        <svg viewBox="0 0 24 24"><path d="M6 3h12v18l-6-4-6 4V3z"/></svg>
+      </button>
+    </div>
+
+    <div class="profile-grid" id="profileGrid"></div>
+    <div class="profile-empty" id="profileEmpty">
+      <div>▦</div><strong>Aucune publication</strong><span>Tes publications apparaîtront ici.</span>
+    </div>
+  </section>
+
+  <div class="edit-profile-modal" id="editProfileModal">
+    <div class="edit-profile-box">
+      <div class="edit-profile-header">
+        <button type="button" id="cancelEditProfile">Annuler</button>
+        <strong>Modifier le profil</strong>
+        <button type="button" id="saveEditProfile">Terminé</button>
+      </div>
+      <div class="edit-profile-avatar"><div class="profile-avatar-large">P</div></div>
+      <label>Nom<input id="editDisplayName" maxlength="30" value="PrettyGirls"></label>
+      <label>Bio<textarea id="editBio" maxlength="150">Bienvenue sur PrettyGirls ❤️</textarea></label>
     </div>
   </div>
 
-  <div class="auth-panel">
-    <div id="loginForm" class="auth-form">
-      <h1>Connexion</h1>
-      <p class="auth-form-subtitle">Connecte-toi pour accéder à PrettyGirls</p>
-      <label class="auth-field"><span>Adresse e-mail</span><input id="loginEmail" type="email" placeholder="tonadresse@email.com" autocomplete="email"></label>
-      <label class="auth-field"><span>Mot de passe</span><input id="loginPassword" type="password" placeholder="Ton mot de passe" autocomplete="current-password"></label>
-      <button id="loginBtn" class="auth-primary-btn" type="button">Se connecter</button>
-      <div id="loginMessage" class="auth-message"></div>
-      <div class="auth-separator"><span></span><strong>OU</strong><span></span></div>
-      <button id="showSignupBtn" class="auth-secondary-btn" type="button">Créer un nouveau compte</button>
-    </div>
+  <nav class="bottom-nav">
+    <button class="nav-btn active" id="homeNav" type="button">
+      <svg viewBox="0 0 24 24"><path d="M3 10.5L12 3l9 7.5V21h-6v-6H9v6H3V10.5z"/></svg><span>Accueil</span>
+    </button>
+    <button class="nav-btn" type="button">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><span>Explorer</span>
+    </button>
+    <button class="create-btn" id="createPost" type="button">+</button>
+    <button class="nav-btn" id="reelsNav" type="button">
+      <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M8 4l4 5 4-5M10 12l6 3-6 3z"/></svg><span>Reels</span>
+    </button>
+    <button class="nav-btn" id="profileNav" type="button"><div class="mini-avatar">P</div><span>Profil</span></button>
+  </nav>
 
-    <div id="signupForm" class="auth-form hidden">
-      <button id="showLoginBtn" class="auth-back-btn" type="button" aria-label="Retour">‹</button>
-      <h1>Créer un compte</h1>
-      <p class="auth-form-subtitle">Crée ton profil PrettyGirls</p>
-      <label class="auth-field"><span>Nom d'utilisateur</span><input id="signupUsername" type="text" maxlength="30" placeholder="Ton nom d'utilisateur" autocomplete="username"></label>
-      <label class="auth-field"><span>Adresse e-mail</span><input id="signupEmail" type="email" placeholder="tonadresse@email.com" autocomplete="email"></label>
-      <label class="auth-field"><span>Mot de passe</span><input id="signupPassword" type="password" placeholder="6 caractères minimum" autocomplete="new-password"></label>
-      <label class="auth-field"><span>Confirmer le mot de passe</span><input id="signupPasswordConfirm" type="password" placeholder="Retape ton mot de passe" autocomplete="new-password"></label>
-      <button id="signupBtn" class="auth-primary-btn" type="button">Créer mon compte</button>
-      <div id="signupMessage" class="auth-message"></div>
-      <p class="auth-login-link">Déjà un compte ? <button id="showLoginTextBtn" type="button">Se connecter</button></p>
+  <input type="file" id="imagePicker" accept="image/*,video/*" multiple hidden>
+
+  <div class="source-choice" id="sourceChoice">
+    <div class="source-choice-box">
+      <div class="sheet-handle"></div><h2>Nouvelle publication</h2>
+      <p>Comment veux-tu ajouter tes médias ?</p>
+      <button class="source-btn" id="chooseUpload" type="button">
+        <div class="source-icon">↑</div><div class="source-text"><strong>Téléverser</strong><span>Photos ou vidéos depuis ton appareil</span></div>
+      </button>
+      <button class="source-btn" id="chooseExternal" type="button">
+        <div class="source-icon">&lt;/&gt;</div><div class="source-text"><strong>Médias externes</strong><span>URL, iframe HTML ou BBCode</span></div>
+      </button>
+      <button class="cancel-source" id="cancelSource" type="button">Annuler</button>
+    </div>
+  </div>
+
+  <div class="external-modal" id="externalModal">
+    <div class="external-box">
+      <div class="external-header">
+        <button class="external-back" id="externalBack" type="button">‹</button><strong>Médias externes</strong><div class="external-header-space"></div>
+      </div>
+      <p class="external-help">Colle un ou plusieurs liens, iframes ou BBCode. Tu peux mélanger plusieurs sites dans la même publication.</p>
+      <textarea id="externalInput" class="external-input" placeholder="https://site.com/photo.jpg"></textarea>
+      <div class="external-examples"><span>Accepté :</span><small>URL directe • &lt;img&gt; • &lt;video&gt; • &lt;iframe&gt; • [img] • [video] • [url]</small></div>
+      <div class="external-error" id="externalError"></div>
+      <button class="external-continue" id="externalContinue" type="button">Continuer</button>
+    </div>
+  </div>
+
+  <div class="publish-choice" id="publishChoice">
+    <div class="publish-choice-box">
+      <div class="sheet-handle"></div><h2>Créer une publication</h2><p id="selectedCount">Médias sélectionnés</p>
+      <button class="publish-type-btn" id="chooseCarousel" type="button"><strong>Carrousel</strong><span>Faire défiler les médias un par un</span></button>
+      <button class="publish-type-btn" id="chooseGrid" type="button"><strong>Grille</strong><span>Afficher plusieurs médias ensemble</span></button>
+      <button class="cancel-publish" id="cancelPublish" type="button">Annuler</button>
+    </div>
+  </div>
+
+  <div class="viewer" id="viewer">
+    <div class="viewer-header"><button id="closeViewer" type="button">‹</button><strong>Publication</strong></div>
+    <div class="viewer-media">
+      <div class="viewer-track" id="viewerTrack"></div>
+      <button class="viewer-arrow viewer-prev" id="viewerPrev" type="button">‹</button>
+      <button class="viewer-arrow viewer-next" id="viewerNext" type="button">›</button>
+      <div class="viewer-counter" id="viewerCounter"></div>
+    </div>
+    <div class="viewer-actions">
+      <button class="viewer-action like-btn" id="viewerLike" type="button">
+        <svg viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg><span id="viewerLikeCount">0</span>
+      </button>
+      <button class="viewer-action" type="button"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.5 9.5 9.5 0 0 1-4-.9L3 21l1.7-4.6A8.5 8.5 0 1 1 21 11.5z"/></svg></button>
+      <button class="viewer-action" type="button"><svg viewBox="0 0 24 24"><path d="M22 2L9.5 14.5M22 2l-8 20-4.5-7.5L2 10l20-8z"/></svg></button>
+      <button class="viewer-action" type="button"><svg viewBox="0 0 24 24"><path d="M6 3h12v18l-6-4-6 4V3z"/></svg></button>
+    </div>
+    <div class="viewer-info">
+      <div class="viewer-user"><div class="avatar">P</div><strong>prettygirls</strong></div>
+      <div class="viewer-caption">Bienvenue sur PrettyGirls ❤️</div>
     </div>
   </div>
 </div>
 
-Tout en bas :
+<!-- AUTHENTIFICATION PLEIN ÉCRAN -->
+<div id="authScreen" class="auth-screen">
+  <video id="authVideo" class="auth-bg-video" autoplay muted loop playsinline preload="auto">
+    <source src="intro.mp4" type="video/mp4">
+  </video>
+  <div class="auth-dark-overlay"></div>
+
+  <div class="auth-content">
+    <div class="auth-brand">
+      <div class="auth-logo"><span>Pretty</span><strong>Girls</strong></div>
+      <p>Partage • Découvre • Connecte-toi</p>
+    </div>
+
+    <div id="loginForm" class="auth-form auth-glass">
+      <h1>Connexion</h1>
+      <input id="loginEmail" type="email" placeholder="Adresse e-mail" autocomplete="email">
+      <input id="loginPassword" type="password" placeholder="Mot de passe" autocomplete="current-password">
+      <button id="loginBtn" class="auth-primary-btn" type="button">Se connecter</button>
+      <div id="loginMessage" class="auth-message"></div>
+      <button id="showSignupBtn" class="auth-outline-btn" type="button">Créer un nouveau compte</button>
+    </div>
+
+    <div id="signupForm" class="auth-form auth-glass hidden">
+      <button id="showLoginBtn" class="auth-back-btn" type="button">‹</button>
+      <h1>Créer un compte</h1>
+      <input id="signupUsername" type="text" maxlength="30" placeholder="Nom d'utilisateur" autocomplete="username">
+      <input id="signupEmail" type="email" placeholder="Adresse e-mail" autocomplete="email">
+      <input id="signupPassword" type="password" placeholder="Mot de passe" autocomplete="new-password">
+      <input id="signupPasswordConfirm" type="password" placeholder="Confirmer le mot de passe" autocomplete="new-password">
+      <button id="signupBtn" class="auth-primary-btn" type="button">Créer mon compte</button>
+      <div id="signupMessage" class="auth-message"></div>
+      <button id="showLoginTextBtn" class="auth-text-btn" type="button">Déjà un compte ? Se connecter</button>
+    </div>
+  </div>
+</div>
+
 <script src="https://www.gstatic.com/firebasejs/12.3.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/12.3.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore-compat.js"></script>
-<script src="script.js?v=20260919-authvideo1"></script>
+<script src="script.js?v=20260919-fullscreen1"></script>
 </body>
 </html>
