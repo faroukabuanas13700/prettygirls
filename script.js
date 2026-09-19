@@ -32,11 +32,30 @@ document.addEventListener("DOMContentLoaded", () => {
   const viewerLike = document.getElementById("viewerLike");
   const viewerLikeCount = document.getElementById("viewerLikeCount");
 
+  const homeNav = document.getElementById("homeNav");
+  const profileNav = document.getElementById("profileNav");
+  const profilePage = document.getElementById("profilePage");
+  const profileGrid = document.getElementById("profileGrid");
+  const profileEmpty = document.getElementById("profileEmpty");
+  const profilePostCount = document.getElementById("profilePostCount");
+  const editProfileBtn = document.getElementById("editProfileBtn");
+  const editProfileModal = document.getElementById("editProfileModal");
+  const cancelEditProfile = document.getElementById("cancelEditProfile");
+  const saveEditProfile = document.getElementById("saveEditProfile");
+  const editDisplayName = document.getElementById("editDisplayName");
+  const editBio = document.getElementById("editBio");
+  const profileDisplayName = document.getElementById("profileDisplayName");
+  const profileBio = document.getElementById("profileBio");
+  const shareProfileBtn = document.getElementById("shareProfileBtn");
+  const profileTabs = Array.from(document.querySelectorAll(".profile-tab"));
+  const homeUI = Array.from(document.querySelectorAll(".home-ui"));
+
   let pendingMedia = [];
   let posts = [];
 
   let activePost = null;
   let viewerIndex = 0;
+  let activeProfileTab = "posts";
 
 
   /* ========================================
@@ -550,6 +569,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     renderFeed();
+    renderProfileGrid();
 
   }
 
@@ -1577,9 +1597,120 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
   /* ========================================
+     NAVIGATION PROFIL
+  ======================================== */
+  function showHome() {
+    profilePage.classList.remove("open");
+    homeUI.forEach(el => el.style.display = "");
+    document.querySelectorAll(".bottom-nav .nav-btn").forEach(btn => btn.classList.remove("active"));
+    homeNav.classList.add("active");
+    window.scrollTo(0, 0);
+  }
+
+  function showProfile() {
+    homeUI.forEach(el => el.style.display = "none");
+    profilePage.classList.add("open");
+    document.querySelectorAll(".bottom-nav .nav-btn").forEach(btn => btn.classList.remove("active"));
+    profileNav.classList.add("active");
+    renderProfileGrid();
+    window.scrollTo(0, 0);
+  }
+
+  homeNav.addEventListener("click", showHome);
+  profileNav.addEventListener("click", showProfile);
+
+  profileTabs.forEach(tab => {
+    tab.addEventListener("click", () => {
+      activeProfileTab = tab.dataset.profileTab;
+      profileTabs.forEach(t => t.classList.toggle("active", t === tab));
+      renderProfileGrid();
+    });
+  });
+
+  function renderProfileGrid() {
+    profileGrid.innerHTML = "";
+    profilePostCount.textContent = posts.length;
+
+    let visiblePosts = posts;
+    if (activeProfileTab === "reels") {
+      visiblePosts = posts.filter(post => post.media.some(item => item.type === "video"));
+    } else if (activeProfileTab === "saved") {
+      visiblePosts = [];
+    }
+
+    profileEmpty.classList.toggle("show", visiblePosts.length === 0);
+
+    visiblePosts.forEach(post => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "profile-grid-item";
+      const first = post.media[0];
+
+      if (first.type === "iframe") {
+        const placeholder = document.createElement("div");
+        placeholder.className = "profile-grid-iframe";
+        placeholder.textContent = "▶";
+        button.appendChild(placeholder);
+      } else {
+        const media = createMediaElement(first);
+        if (media.tagName === "VIDEO") {
+          media.controls = false;
+          media.muted = true;
+          media.preload = "metadata";
+        }
+        button.appendChild(media);
+      }
+
+      if (post.media.length > 1) {
+        const badge = document.createElement("span");
+        badge.className = "profile-grid-badge";
+        badge.textContent = "▣";
+        button.appendChild(badge);
+      }
+
+      button.addEventListener("click", () => openFullViewer(post, 0));
+      profileGrid.appendChild(button);
+    });
+  }
+
+  editProfileBtn.addEventListener("click", () => {
+    editDisplayName.value = profileDisplayName.textContent;
+    editBio.value = profileBio.textContent;
+    editProfileModal.classList.add("open");
+    document.body.style.overflow = "hidden";
+  });
+
+  cancelEditProfile.addEventListener("click", () => {
+    editProfileModal.classList.remove("open");
+    document.body.style.overflow = "";
+  });
+
+  saveEditProfile.addEventListener("click", () => {
+    profileDisplayName.textContent = editDisplayName.value.trim() || "PrettyGirls";
+    profileBio.textContent = editBio.value.trim() || "Bienvenue sur PrettyGirls ❤️";
+    editProfileModal.classList.remove("open");
+    document.body.style.overflow = "";
+  });
+
+  shareProfileBtn.addEventListener("click", async () => {
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: "PrettyGirls", url: window.location.href });
+      } else if (navigator.clipboard) {
+        await navigator.clipboard.writeText(window.location.href);
+        alert("Lien du profil copié.");
+      }
+    } catch (error) {
+      // Partage annulé par l'utilisateur.
+    }
+  });
+
+
+  /* ========================================
      DÉMARRAGE
   ======================================== */
 
   renderFeed();
+  renderProfileGrid();
 
 });
