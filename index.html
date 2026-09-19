@@ -1,70 +1,53 @@
-INDEX.HTML — CORRECTION AUTHENTIFICATION PRETTYGIRLS
+PRETTYGIRLS — index.html — NOUVELLE INTERFACE AVEC intro.mp4
 
-1) Supprimer l'ancien bloc :
-<!-- CONNEXION / INSCRIPTION -->
-<div id="authScreen" class="auth-screen" style="display:flex;">
-...
-</div>
+Dans le <head>, utilise :
+<link rel="stylesheet" href="style.css?v=20260919-authvideo1">
 
-2) Mettre ce bloc à sa place :
-
-<!-- ==========================================
-     CONNEXION / INSCRIPTION PRETTYGIRLS
-=========================================== -->
+Supprime entièrement l'ancien bloc authScreen et remplace-le par :
 
 <div id="authScreen" class="auth-screen">
-  <div class="auth-container">
-    <div class="auth-logo">
-      <span>Pretty</span><strong>Girls</strong>
+  <div class="auth-video-zone">
+    <video id="authVideo" class="auth-video" autoplay muted loop playsinline preload="auto">
+      <source src="intro.mp4" type="video/mp4">
+    </video>
+    <div class="auth-video-shade"></div>
+    <div class="auth-brand">
+      <div class="auth-logo"><span>Pretty</span><strong>Girls</strong></div>
+      <p>Partage • Découvre • Connecte-toi</p>
     </div>
+  </div>
 
-    <p class="auth-subtitle">Crée ton profil et rejoins PrettyGirls</p>
-
+  <div class="auth-panel">
     <div id="loginForm" class="auth-form">
-      <h2>Connexion</h2>
-
-      <input id="loginEmail" type="email" placeholder="Adresse e-mail" autocomplete="email">
-      <input id="loginPassword" type="password" placeholder="Mot de passe" autocomplete="current-password">
-
-      <button id="loginBtn" class="auth-main-btn" type="button">Se connecter</button>
-
+      <h1>Connexion</h1>
+      <p class="auth-form-subtitle">Connecte-toi pour accéder à PrettyGirls</p>
+      <label class="auth-field"><span>Adresse e-mail</span><input id="loginEmail" type="email" placeholder="tonadresse@email.com" autocomplete="email"></label>
+      <label class="auth-field"><span>Mot de passe</span><input id="loginPassword" type="password" placeholder="Ton mot de passe" autocomplete="current-password"></label>
+      <button id="loginBtn" class="auth-primary-btn" type="button">Se connecter</button>
       <div id="loginMessage" class="auth-message"></div>
-
-      <p class="auth-switch">
-        Tu n'as pas encore de compte ?
-        <button id="showSignupBtn" type="button">Créer un compte</button>
-      </p>
+      <div class="auth-separator"><span></span><strong>OU</strong><span></span></div>
+      <button id="showSignupBtn" class="auth-secondary-btn" type="button">Créer un nouveau compte</button>
     </div>
 
     <div id="signupForm" class="auth-form hidden">
-      <h2>Créer un compte</h2>
-
-      <input id="signupUsername" type="text" maxlength="30" placeholder="Nom d'utilisateur" autocomplete="username">
-      <input id="signupEmail" type="email" placeholder="Adresse e-mail" autocomplete="email">
-      <input id="signupPassword" type="password" placeholder="Mot de passe" autocomplete="new-password">
-      <input id="signupPasswordConfirm" type="password" placeholder="Confirmer le mot de passe" autocomplete="new-password">
-
-      <button id="signupBtn" class="auth-main-btn" type="button">Créer mon compte</button>
-
+      <button id="showLoginBtn" class="auth-back-btn" type="button" aria-label="Retour">‹</button>
+      <h1>Créer un compte</h1>
+      <p class="auth-form-subtitle">Crée ton profil PrettyGirls</p>
+      <label class="auth-field"><span>Nom d'utilisateur</span><input id="signupUsername" type="text" maxlength="30" placeholder="Ton nom d'utilisateur" autocomplete="username"></label>
+      <label class="auth-field"><span>Adresse e-mail</span><input id="signupEmail" type="email" placeholder="tonadresse@email.com" autocomplete="email"></label>
+      <label class="auth-field"><span>Mot de passe</span><input id="signupPassword" type="password" placeholder="6 caractères minimum" autocomplete="new-password"></label>
+      <label class="auth-field"><span>Confirmer le mot de passe</span><input id="signupPasswordConfirm" type="password" placeholder="Retape ton mot de passe" autocomplete="new-password"></label>
+      <button id="signupBtn" class="auth-primary-btn" type="button">Créer mon compte</button>
       <div id="signupMessage" class="auth-message"></div>
-
-      <p class="auth-switch">
-        Tu as déjà un compte ?
-        <button id="showLoginBtn" type="button">Se connecter</button>
-      </p>
+      <p class="auth-login-link">Déjà un compte ? <button id="showLoginTextBtn" type="button">Se connecter</button></p>
     </div>
   </div>
 </div>
 
-3) Dans le <head>, remplacer :
-<link rel="stylesheet" href="style.css">
-
-par :
-<link rel="stylesheet" href="style.css?v=20260919-auth3">
-
-4) Tout en bas garder :
-
+Tout en bas :
 <script src="https://www.gstatic.com/firebasejs/12.3.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/12.3.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/12.3.0/firebase-firestore-compat.js"></script>
-<script src="script.js?v=20260919-auth3"></script>
+<script src="script.js?v=20260919-authvideo1"></script>
+</body>
+</html>
