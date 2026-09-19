@@ -1,151 +1,85 @@
-STYLE.CSS — AJOUTER CE BLOC TOUT EN BAS DU FICHIER
+PRETTYGIRLS — style.css — NOUVELLE INTERFACE AUTH
 
-/* =========================
-   AUTHENTIFICATION
-========================= */
+Supprime l'ancien bloc CSS AUTHENTIFICATION ajouté précédemment puis colle ceci à la fin :
 
-#app {
-  display: none;
-}
-
-#app.authenticated {
-  display: block;
-}
+#app { display:none; }
+#app.authenticated { display:block; }
+body.auth-active { overflow:hidden; }
 
 .auth-screen {
-  position: fixed;
-  inset: 0;
-  z-index: 99999;
-  width: 100%;
-  min-height: 100dvh;
-  overflow-y: auto;
-  background: #000;
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 28px 20px;
+  position:fixed; inset:0; z-index:99999; width:100%; height:100dvh;
+  background:#000; color:#fff; overflow-x:hidden; overflow-y:auto; overscroll-behavior:none;
 }
+.auth-screen.authenticated { display:none; }
 
-.auth-screen.authenticated {
-  display: none;
+.auth-video-zone {
+  width:100%; height:42dvh; min-height:280px; max-height:430px;
+  position:relative; overflow:hidden; background:#090909;
 }
-
-.auth-container {
-  width: 100%;
-  max-width: 390px;
-  margin: auto;
+.auth-video {
+  position:absolute; inset:0; width:100%; height:100%; display:block;
+  object-fit:cover; object-position:center;
 }
-
-.auth-logo {
-  text-align: center;
-  font-size: 42px;
-  font-weight: 900;
-  letter-spacing: -2px;
-  margin-bottom: 8px;
+.auth-video-shade {
+  position:absolute; inset:0;
+  background:linear-gradient(to bottom,rgba(0,0,0,.08) 0%,rgba(0,0,0,.05) 45%,rgba(0,0,0,.72) 82%,#000 100%);
+  pointer-events:none;
 }
+.auth-brand { position:absolute; left:24px; right:24px; bottom:27px; z-index:2; text-align:center; }
+.auth-logo { font-size:clamp(38px,11vw,54px); font-weight:900; letter-spacing:-2.3px; line-height:1; }
+.auth-logo span { color:#fff; }
+.auth-logo strong { color:#ff3040; }
+.auth-brand p { margin:10px 0 0; color:rgba(255,255,255,.82); font-size:14px; font-weight:500; }
 
-.auth-logo span {
-  color: #fff;
+.auth-panel {
+  width:100%; min-height:58dvh; background:#000;
+  padding:22px max(20px,env(safe-area-inset-right)) calc(32px + env(safe-area-inset-bottom)) max(20px,env(safe-area-inset-left));
 }
+.auth-form { width:100%; max-width:460px; margin:0 auto; position:relative; }
+.auth-form.hidden { display:none; }
+.auth-form h1 { margin:0; color:#fff; font-size:27px; line-height:34px; font-weight:800; letter-spacing:-.6px; }
+.auth-form-subtitle { margin:5px 0 23px; color:#8e8e93; font-size:14px; line-height:20px; }
 
-.auth-logo strong {
-  color: #ff3040;
+.auth-field { display:block; margin-bottom:15px; }
+.auth-field > span { display:block; margin:0 0 7px 2px; color:#d0d0d0; font-size:13px; font-weight:600; }
+.auth-field input {
+  width:100%; height:55px; display:block; margin:0; padding:0 16px;
+  border:1px solid #292929; border-radius:14px; outline:none;
+  background:#111; color:#fff; font-family:inherit; font-size:16px;
 }
+.auth-field input::placeholder { color:#666; }
+.auth-field input:focus { border-color:#ff3040; background:#151515; }
 
-.auth-subtitle {
-  margin: 0 0 35px;
-  text-align: center;
-  color: #8e8e8e;
-  font-size: 14px;
-  line-height: 20px;
+.auth-primary-btn,.auth-secondary-btn {
+  width:100%; min-height:54px; border-radius:14px; font-family:inherit; font-size:15px; font-weight:800;
 }
+.auth-primary-btn { margin-top:4px; border:0; background:#ff3040; color:#fff; box-shadow:0 8px 30px rgba(255,48,64,.16); }
+.auth-primary-btn:active { transform:scale(.985); }
+.auth-primary-btn:disabled { opacity:.55; }
+.auth-secondary-btn { border:1px solid #333; background:#171717; color:#fff; }
+.auth-secondary-btn:active { background:#202020; }
 
-.auth-form {
-  width: 100%;
+.auth-message { width:100%; min-height:20px; margin-top:11px; color:#ff5966; text-align:center; font-size:13px; line-height:18px; }
+.auth-separator { width:100%; display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:12px; margin:17px 0; }
+.auth-separator span { height:1px; background:#262626; }
+.auth-separator strong { color:#777; font-size:11px; }
+
+.auth-back-btn {
+  width:42px; height:42px; margin:-5px 0 9px -9px; border:0; background:transparent;
+  color:#fff; font-size:42px; line-height:34px; padding:0;
 }
+.auth-login-link { margin:21px 0 0; text-align:center; color:#8e8e93; font-size:13px; }
+.auth-login-link button { border:0; background:transparent; color:#ff3040; font-family:inherit; font-size:13px; font-weight:800; padding:5px; }
 
-.auth-form.hidden {
-  display: none;
+@media (max-width:500px) {
+  .auth-video-zone { height:40dvh; min-height:250px; }
+  .auth-panel { padding-left:18px; padding-right:18px; }
+  .auth-form h1 { font-size:25px; }
 }
-
-.auth-form h2 {
-  margin: 0 0 20px;
-  text-align: center;
-  font-size: 22px;
-}
-
-.auth-form input {
-  width: 100%;
-  height: 52px;
-  display: block;
-  margin-bottom: 12px;
-  padding: 0 15px;
-  border: 1px solid #303030;
-  border-radius: 12px;
-  outline: none;
-  background: #111;
-  color: #fff;
-  font-family: inherit;
-  font-size: 15px;
-}
-
-.auth-form input:focus {
-  border-color: #ff3040;
-}
-
-.auth-form input::placeholder {
-  color: #777;
-}
-
-.auth-main-btn {
-  width: 100%;
-  height: 52px;
-  margin-top: 5px;
-  border: 0;
-  border-radius: 12px;
-  background: #ff3040;
-  color: #fff;
-  font-size: 15px;
-  font-weight: 700;
-}
-
-.auth-main-btn:disabled {
-  opacity: 0.6;
-}
-
-.auth-message {
-  min-height: 22px;
-  margin-top: 12px;
-  color: #ff5966;
-  text-align: center;
-  font-size: 13px;
-  line-height: 18px;
-}
-
-.auth-switch {
-  margin: 24px 0 0;
-  color: #999;
-  text-align: center;
-  font-size: 13px;
-}
-
-.auth-switch button {
-  border: 0;
-  background: transparent;
-  color: #ff3040;
-  padding: 5px;
-  font-size: 13px;
-  font-weight: 700;
-}
-
-@media (max-width: 500px) {
-  .auth-screen {
-    align-items: flex-start;
-    padding-top: max(70px, env(safe-area-inset-top));
-  }
-
-  .auth-logo {
-    font-size: 39px;
-  }
+@media (max-height:700px) {
+  .auth-video-zone { height:34dvh; min-height:205px; }
+  .auth-panel { padding-top:16px; }
+  .auth-brand { bottom:19px; }
+  .auth-logo { font-size:37px; }
+  .auth-brand p { margin-top:7px; font-size:12px; }
 }
