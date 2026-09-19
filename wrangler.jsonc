@@ -2,5 +2,13 @@
 {
   "name": "prettygirls-api",
   "main": "worker.js",
-  "compatibility_date": "2026-09-19"
+  "compatibility_date": "2026-09-19",
+
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "prettygirls",
+      "database_id": "8758e8f9-884a-43d1-ba99-38085c051b68"
+    }
+  ]
 }
