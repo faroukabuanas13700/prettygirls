@@ -1,3 +1,17 @@
+const firebaseConfig = {
+  apiKey: "AIzaSyBSDUYIIzNi-6WJz_QpEOE6KQKEQ9no3Y0",
+  authDomain: "prettygirls-8e2cf.firebaseapp.com",
+  projectId: "prettygirls-8e2cf",
+  storageBucket: "prettygirls-8e2cf.firebasestorage.app",
+  messagingSenderId: "54340647655",
+  appId: "1:54340647655:web:02a86d117d8073c21d0042",
+  measurementId: "G-25PE8MX3WD"
+};
+
+firebase.initializeApp(firebaseConfig);
+
+const auth = firebase.auth();
+const db = firebase.firestore();
 document.addEventListener("DOMContentLoaded", () => {
 
   const feed = document.getElementById("feed");
